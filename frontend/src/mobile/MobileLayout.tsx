@@ -22,11 +22,11 @@ export const MobileLayout: React.FC = () => {
   const igAccount = connectedAccounts.find((a) => a.platform === 'instagram' && a.isConnected);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-black text-zinc-900 dark:text-zinc-100 flex flex-col justify-between selection:bg-rose-500 selection:text-white transition-colors">
+    <div className="min-h-screen bg-slate-50 dark:bg-black text-zinc-900 dark:text-zinc-100 flex flex-col justify-between selection:bg-violet-600 selection:text-white transition-colors">
       {/* Mobile Top Header */}
       <header className="sticky top-0 z-40 h-14 bg-white/90 dark:bg-black/90 backdrop-blur-xl border-b border-zinc-200 dark:border-white/10 px-4 flex items-center justify-between">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="ig-ring shrink-0">
+          <div className="ring-2 ring-violet-500/30 rounded-full p-0.5 shrink-0">
             <img
               src={brandKit.logoUrl || igAccount?.avatarUrl || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100'}
               alt="Brand logo"
@@ -67,7 +67,7 @@ export const MobileLayout: React.FC = () => {
           end
           className={({ isActive }) =>
             `flex flex-col items-center gap-1 text-[10px] font-semibold transition-colors ${
-              isActive ? 'text-rose-500' : 'text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200'
+              isActive ? 'text-violet-600 dark:text-violet-400 font-bold' : 'text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200'
             }`
           }
         >
@@ -79,7 +79,7 @@ export const MobileLayout: React.FC = () => {
           to="/mobile/create"
           className="flex flex-col items-center gap-1 group -mt-5"
         >
-          <div className="w-12 h-12 rounded-full ig-gradient flex items-center justify-center text-white shadow-lg ig-glow-sm group-active:scale-95 transition-transform">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-violet-600 via-purple-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-violet-500/25 group-active:scale-95 transition-transform">
             <Plus className="w-6 h-6 stroke-[2.5]" />
           </div>
           <span className="text-[10px] font-bold text-zinc-700 dark:text-zinc-200">Create</span>
@@ -89,7 +89,7 @@ export const MobileLayout: React.FC = () => {
           to="/mobile/queue"
           className={({ isActive }) =>
             `flex flex-col items-center gap-1 text-[10px] font-semibold transition-colors ${
-              isActive ? 'text-rose-500' : 'text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200'
+              isActive ? 'text-violet-600 dark:text-violet-400 font-bold' : 'text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200'
             }`
           }
         >
@@ -101,7 +101,7 @@ export const MobileLayout: React.FC = () => {
           to="/mobile/brand"
           className={({ isActive }) =>
             `flex flex-col items-center gap-1 text-[10px] font-semibold transition-colors ${
-              isActive ? 'text-rose-500' : 'text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200'
+              isActive ? 'text-violet-600 dark:text-violet-400 font-bold' : 'text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200'
             }`
           }
         >

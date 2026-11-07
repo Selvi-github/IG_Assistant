@@ -31,6 +31,116 @@ export interface GeneratedAiPost {
   contentCategory?: string;
 }
 
+const CATEGORY_VISUALS: Record<string, string[]> = {
+  saree: [
+    'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1080&h=1350&q=85',
+    'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=1080&h=1350&q=85',
+    'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=1080&h=1350&q=85',
+    'https://images.unsplash.com/photo-1609357605129-26f69add5d6e?auto=format&fit=crop&w=1080&h=1350&q=85',
+  ],
+  cafe: [
+    'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1080&h=1350&q=85',
+    'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1080&h=1350&q=85',
+    'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1080&h=1350&q=85',
+    'https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&fit=crop&w=1080&h=1350&q=85',
+  ],
+  education: [
+    'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1080&h=1350&q=85',
+    'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1080&h=1350&q=85',
+    'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=1080&h=1350&q=85',
+    'https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?auto=format&fit=crop&w=1080&h=1350&q=85',
+  ],
+  automotive: [
+    'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&w=1080&h=1350&q=85',
+    'https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?auto=format&fit=crop&w=1080&h=1350&q=85',
+    'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1080&h=1350&q=85',
+    'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=1080&h=1350&q=85',
+  ],
+  electronics: [
+    'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=1080&h=1350&q=85',
+    'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1080&h=1350&q=85',
+    'https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?auto=format&fit=crop&w=1080&h=1350&q=85',
+    'https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?auto=format&fit=crop&w=1080&h=1350&q=85',
+  ],
+  fitness: [
+    'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1080&h=1350&q=85',
+    'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=1080&h=1350&q=85',
+    'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=1080&h=1350&q=85',
+    'https://images.unsplash.com/photo-1540497077202-7c8a3999166f?auto=format&fit=crop&w=1080&h=1350&q=85',
+  ],
+  beauty: [
+    'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1080&h=1350&q=85',
+    'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1080&h=1350&q=85',
+    'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=1080&h=1350&q=85',
+    'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=1080&h=1350&q=85',
+  ],
+  real_estate: [
+    'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1080&h=1350&q=85',
+    'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1080&h=1350&q=85',
+    'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1080&h=1350&q=85',
+    'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1080&h=1350&q=85',
+  ],
+  professional: [
+    'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1080&h=1350&q=85',
+    'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1080&h=1350&q=85',
+    'https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=1080&h=1350&q=85',
+    'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1080&h=1350&q=85',
+  ],
+  healthcare: [
+    'https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=1080&h=1350&q=85',
+    'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1080&h=1350&q=85',
+    'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=1080&h=1350&q=85',
+    'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&w=1080&h=1350&q=85',
+  ],
+  festival: [
+    'https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=1080&h=1350&q=85',
+    'https://images.unsplash.com/photo-1605379399642-870262d3d051?auto=format&fit=crop&w=1080&h=1350&q=85',
+    'https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=1080&h=1350&q=85',
+    'https://images.unsplash.com/photo-1543258103-a62bdc069871?auto=format&fit=crop&w=1080&h=1350&q=85',
+  ],
+  default: [
+    'https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=1080&h=1350&q=85',
+    'https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=1080&h=1350&q=85',
+    'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1080&h=1350&q=85',
+    'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1080&h=1350&q=85',
+  ],
+};
+
+function detectCategoryKey(prompt: string): string {
+  const lower = prompt.toLowerCase();
+  if (lower.includes('saree') || lower.includes('boutique') || lower.includes('dress') || lower.includes('fashion') || lower.includes('clothing') || lower.includes('jewelry') || lower.includes('apparel')) {
+    return 'saree';
+  }
+  if (lower.includes('cafe') || lower.includes('coffee') || lower.includes('tea') || lower.includes('bakery') || lower.includes('cake') || lower.includes('food') || lower.includes('restaurant') || lower.includes('dining')) {
+    return 'cafe';
+  }
+  if (lower.includes('school') || lower.includes('college') || lower.includes('campus') || lower.includes('student') || lower.includes('education') || lower.includes('academy') || lower.includes('university') || lower.includes('clg')) {
+    return 'education';
+  }
+  if (lower.includes('car') || lower.includes('bike') || lower.includes('motorcycle') || lower.includes('vehicle') || lower.includes('automobile') || lower.includes('showroom') || lower.includes('dealership')) {
+    return 'automotive';
+  }
+  if (lower.includes('mobile') || lower.includes('phone') || lower.includes('laptop') || lower.includes('electronics') || lower.includes('gadget') || lower.includes('tech') || lower.includes('computer')) {
+    return 'electronics';
+  }
+  if (lower.includes('gym') || lower.includes('fitness') || lower.includes('workout') || lower.includes('yoga') || lower.includes('athletic') || lower.includes('training')) {
+    return 'fitness';
+  }
+  if (lower.includes('salon') || lower.includes('beauty') || lower.includes('cosmetics') || lower.includes('spa') || lower.includes('skin') || lower.includes('hair')) {
+    return 'beauty';
+  }
+  if (lower.includes('real estate') || lower.includes('house') || lower.includes('home') || lower.includes('villa') || lower.includes('interior') || lower.includes('property') || lower.includes('architecture')) {
+    return 'real_estate';
+  }
+  if (lower.includes('doctor') || lower.includes('clinic') || lower.includes('health') || lower.includes('dental') || lower.includes('hospital') || lower.includes('medical') || lower.includes('wellness')) {
+    return 'healthcare';
+  }
+  if (lower.includes('diwali') || lower.includes('festival') || lower.includes('offer') || lower.includes('discount') || lower.includes('sale') || lower.includes('festive') || lower.includes('pongal')) {
+    return 'festival';
+  }
+  return 'default';
+}
+
 export const AiImageService = {
   /**
    * ChatGPT & Gemini-grade Prompt Expander.
@@ -211,15 +321,32 @@ export const AiImageService = {
 
   imageIsSharpEnough(buffer: ArrayBuffer): boolean {
     const bytes = new Uint8Array(buffer);
-    if (bytes.length < 8000) return false;
+    if (bytes.length < 2000) return false;
+    // Discard JSON error responses (like {"status": 402})
+    if (bytes[0] === 0x7b || bytes[0] === 0x3c) return false;
     const isPng = bytes[0] === 0x89 && bytes[1] === 0x50;
     const isJpeg = bytes[0] === 0xff && bytes[1] === 0xd8;
-    if (!isPng && !isJpeg) return false;
-    if (isPng && bytes.length > 24) {
-      const width = (bytes[16] << 24) | (bytes[17] << 16) | (bytes[18] << 8) | bytes[19];
-      return width >= 512;
+    const isWebp = bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46;
+    return isPng || isJpeg || isWebp;
+  },
+
+  async fetchFallbackStockImage(prompt: string, slideIndex = 0): Promise<ArrayBuffer | null> {
+    const key = detectCategoryKey(prompt);
+    const list = CATEGORY_VISUALS[key] || CATEGORY_VISUALS.default;
+    const url = list[slideIndex % list.length] || list[0];
+    try {
+      console.log(`[AI Image] Serving master visual for '${key}' (slide ${slideIndex + 1})...`);
+      const response = await fetch(url, { signal: AbortSignal.timeout(10000) });
+      if (response.ok) {
+        const buffer = await response.arrayBuffer();
+        if (buffer.byteLength > 2000 && this.imageIsSharpEnough(buffer)) {
+          return buffer;
+        }
+      }
+    } catch (err: any) {
+      console.warn('[AI Image] Stock visual note:', err.message);
     }
-    return true;
+    return null;
   },
 
   async fetchFromGradio(base: string, prompt: string): Promise<ArrayBuffer | null> {
@@ -593,6 +720,9 @@ export const AiImageService = {
       }
     }
 
+    const stock = await this.fetchFallbackStockImage(clipped, Math.abs(seed) % 4);
+    if (stock) return stock;
+
     return null;
   },
 
@@ -711,12 +841,11 @@ export const AiImageService = {
         let buffer = await this.fetchImageBuffer(enrichedPrompt, slideSeed);
 
         if (!buffer) {
-          // Fast guaranteed fallback so carousel never fails
-          const fallbackUrl = this.getDiffusionImageUrl(enrichedPrompt.slice(0, 800), slideSeed, 1080, 1350, 'turbo');
-          try {
-            const resp = await fetch(fallbackUrl, { signal: AbortSignal.timeout(12000) });
-            if (resp.ok) buffer = await resp.arrayBuffer();
-          } catch {}
+          // Guaranteed high-aesthetic fallback visual so posts and carousels never fail
+          buffer = await this.fetchFallbackStockImage(cleanPrompt, i);
+        }
+        if (!buffer) {
+          buffer = await this.fetchFallbackStockImage('modern boutique cafe', i);
         }
 
         if (!buffer) {

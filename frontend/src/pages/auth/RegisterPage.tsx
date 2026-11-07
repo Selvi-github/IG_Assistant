@@ -243,9 +243,9 @@ export const RegisterPage: React.FC = () => {
         ) : (
           <form onSubmit={handleVerify} className="space-y-4">
             {devOtp && (
-              <div className="p-3 rounded-xl bg-pink-50 dark:bg-pink-950/40 border border-pink-200 dark:border-pink-850 text-xs flex items-center justify-between">
+              <div className="p-3 rounded-xl bg-violet-50 dark:bg-violet-950/40 border border-violet-200 dark:border-violet-850 text-xs flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] uppercase font-bold text-pink-600 dark:text-pink-400 block tracking-wider">
+                  <span className="text-[10px] uppercase font-bold text-violet-600 dark:text-violet-400 block tracking-wider">
                     Your Verification Code
                   </span>
                   <span className="font-mono text-base font-black text-zinc-900 dark:text-white tracking-widest">
@@ -255,7 +255,7 @@ export const RegisterPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setOtp(devOtp)}
-                  className="px-2.5 py-1 rounded-lg bg-white dark:bg-zinc-800 border border-pink-300 dark:border-pink-700 text-[#fb2175] font-bold text-[11px] shadow-2xs hover:bg-pink-50 cursor-pointer"
+                  className="px-2.5 py-1 rounded-lg bg-white dark:bg-zinc-800 border border-violet-300 dark:border-violet-700 text-violet-600 dark:text-violet-400 font-bold text-[11px] shadow-2xs hover:bg-violet-50 cursor-pointer"
                 >
                   Auto-Fill
                 </button>

@@ -178,7 +178,7 @@ export const MobileAuthPage: React.FC<MobileAuthPageProps> = ({ onSuccess }) => 
                 }}
                 className={`py-2 rounded-lg transition-all cursor-pointer ${
                   mode === 'signin'
-                    ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white border-2 border-pink-400 shadow-xs'
+                    ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white border border-violet-500 shadow-xs'
                     : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
                 }`}
               >
@@ -193,7 +193,7 @@ export const MobileAuthPage: React.FC<MobileAuthPageProps> = ({ onSuccess }) => 
                 }}
                 className={`py-2 rounded-lg transition-all cursor-pointer ${
                   mode === 'signup'
-                    ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white border-2 border-pink-400 shadow-xs'
+                    ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white border border-violet-500 shadow-xs'
                     : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
                 }`}
               >
@@ -216,7 +216,7 @@ export const MobileAuthPage: React.FC<MobileAuthPageProps> = ({ onSuccess }) => 
             </div>
           )}
 
-          {/* Form Inputs with Pink Border for crisp visibility */}
+          {/* Form Inputs with clean neutral border and violet focus */}
           <form onSubmit={handleSubmit} className="space-y-3">
             {mode === 'signup' && (
               <div>
@@ -224,14 +224,14 @@ export const MobileAuthPage: React.FC<MobileAuthPageProps> = ({ onSuccess }) => 
                   Full Name
                 </label>
                 <div className="relative">
-                  <User className="w-4 h-4 text-[#fb2175] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <User className="w-4 h-4 text-violet-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input
                     type="text"
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="Sarah Vance"
-                    className="w-full bg-white dark:bg-zinc-950 border-2 border-pink-400 focus:border-[#fb2175] focus:ring-2 focus:ring-pink-200/50 rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-zinc-900 dark:text-white placeholder:text-zinc-400 font-medium transition-all"
+                    className="w-full bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 focus:border-violet-600 focus:ring-2 focus:ring-violet-500/20 rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-zinc-900 dark:text-white placeholder:text-zinc-400 font-medium transition-all"
                   />
                 </div>
               </div>
@@ -243,14 +243,14 @@ export const MobileAuthPage: React.FC<MobileAuthPageProps> = ({ onSuccess }) => 
                   Email Address
                 </label>
                 <div className="relative">
-                  <Mail className="w-4 h-4 text-[#fb2175] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <Mail className="w-4 h-4 text-violet-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input
                     type="email"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="creator@brand.com"
-                    className="w-full bg-white dark:bg-zinc-950 border-2 border-pink-400 focus:border-[#fb2175] focus:ring-2 focus:ring-pink-200/50 rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-zinc-900 dark:text-white placeholder:text-zinc-400 font-medium transition-all"
+                    className="w-full bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 focus:border-violet-600 focus:ring-2 focus:ring-violet-500/20 rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-zinc-900 dark:text-white placeholder:text-zinc-400 font-medium transition-all"
                   />
                 </div>
               </div>
@@ -270,21 +270,21 @@ export const MobileAuthPage: React.FC<MobileAuthPageProps> = ({ onSuccess }) => 
                         setErrorMessage('');
                         setSuccessMessage('');
                       }}
-                      className="text-[11px] font-semibold text-[#fb2175] hover:underline cursor-pointer"
+                      className="text-[11px] font-semibold text-violet-600 dark:text-violet-400 hover:underline cursor-pointer"
                     >
                       Forgot?
                     </button>
                   )}
                 </div>
                 <div className="relative">
-                  <Lock className="w-4 h-4 text-[#fb2175] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <Lock className="w-4 h-4 text-violet-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input
                     type="password"
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="At least 8 characters"
-                    className="w-full bg-white dark:bg-zinc-950 border-2 border-pink-400 focus:border-[#fb2175] focus:ring-2 focus:ring-pink-200/50 rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-zinc-900 dark:text-white placeholder:text-zinc-400 font-medium transition-all"
+                    className="w-full bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 focus:border-violet-600 focus:ring-2 focus:ring-violet-500/20 rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-zinc-900 dark:text-white placeholder:text-zinc-400 font-medium transition-all"
                   />
                 </div>
               </div>
@@ -294,9 +294,9 @@ export const MobileAuthPage: React.FC<MobileAuthPageProps> = ({ onSuccess }) => 
               <div>
                 {/* Visual OTP banner for instant local testing */}
                 {devOtp && (
-                  <div className="mb-3 p-3 rounded-xl bg-pink-50 dark:bg-pink-950/40 border border-pink-200 dark:border-pink-850 text-xs flex items-center justify-between">
+                  <div className="mb-3 p-3 rounded-xl bg-violet-50 dark:bg-violet-950/40 border border-violet-200 dark:border-violet-850 text-xs flex items-center justify-between">
                     <div>
-                      <span className="text-[10px] uppercase font-bold text-pink-600 dark:text-pink-400 block tracking-wider">
+                      <span className="text-[10px] uppercase font-bold text-violet-600 dark:text-violet-400 block tracking-wider">
                         Your Verification Code
                       </span>
                       <span className="font-mono text-base font-black text-zinc-900 dark:text-white tracking-widest">
@@ -306,7 +306,7 @@ export const MobileAuthPage: React.FC<MobileAuthPageProps> = ({ onSuccess }) => 
                     <button
                       type="button"
                       onClick={() => setOtp(devOtp)}
-                      className="px-2.5 py-1 rounded-lg bg-white dark:bg-zinc-800 border border-pink-300 dark:border-pink-700 text-[#fb2175] font-bold text-[11px] shadow-2xs hover:bg-pink-50 cursor-pointer"
+                      className="px-2.5 py-1 rounded-lg bg-white dark:bg-zinc-800 border border-violet-300 dark:border-violet-700 text-violet-600 dark:text-violet-400 font-bold text-[11px] shadow-2xs hover:bg-violet-50 cursor-pointer"
                     >
                       Auto-Fill
                     </button>
@@ -321,7 +321,7 @@ export const MobileAuthPage: React.FC<MobileAuthPageProps> = ({ onSuccess }) => 
                   6-Digit Verification Code
                 </label>
                 <div className="relative">
-                  <KeyRound className="w-4 h-4 text-[#fb2175] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <KeyRound className="w-4 h-4 text-violet-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input
                     type="text"
                     required
@@ -329,14 +329,14 @@ export const MobileAuthPage: React.FC<MobileAuthPageProps> = ({ onSuccess }) => 
                     value={otp}
                     onChange={(e) => setOtp(e.target.value)}
                     placeholder="123456"
-                    className="w-full tracking-widest text-center bg-white dark:bg-zinc-950 border-2 border-pink-400 focus:border-[#fb2175] focus:ring-2 focus:ring-pink-200/50 rounded-xl pl-9 pr-3.5 py-2.5 text-sm font-bold text-zinc-900 dark:text-white placeholder:text-zinc-400 transition-all"
+                    className="w-full tracking-widest text-center bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 focus:border-violet-600 focus:ring-2 focus:ring-violet-500/20 rounded-xl pl-9 pr-3.5 py-2.5 text-sm font-bold text-zinc-900 dark:text-white placeholder:text-zinc-400 transition-all"
                   />
                 </div>
                 <div className="flex justify-between items-center mt-2">
                   <button
                     type="button"
                     onClick={handleResendOtp}
-                    className="text-[11px] font-semibold text-[#fb2175] hover:underline flex items-center gap-1 cursor-pointer"
+                    className="text-[11px] font-semibold text-violet-600 dark:text-violet-400 hover:underline flex items-center gap-1 cursor-pointer"
                   >
                     <RotateCcw className="w-3 h-3" />
                     <span>Resend Code</span>
@@ -371,11 +371,11 @@ export const MobileAuthPage: React.FC<MobileAuthPageProps> = ({ onSuccess }) => 
               </div>
             )}
 
-            {/* Submit Button (Gradient button preserved as requested) */}
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 px-4 rounded-xl ig-gradient text-white font-bold text-xs shadow-md hover:brightness-110 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 mt-1"
+              className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-xs shadow-md hover:brightness-110 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 mt-1"
             >
               {isLoading ? (
                 <span>Processing...</span>

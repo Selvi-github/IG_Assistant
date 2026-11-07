@@ -745,7 +745,7 @@ export const MobileCreatePostPage: React.FC = () => {
             <button
               type="button"
               onClick={handlePublishOrShare}
-              className="w-full py-3.5 px-4 rounded-xl ig-gradient text-white text-xs font-bold shadow-md hover:brightness-110 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-xs font-bold shadow-md hover:brightness-110 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               <Share2 className="w-4 h-4" />
               <span>Share Again via Device Sheet</span>
@@ -796,7 +796,7 @@ export const MobileCreatePostPage: React.FC = () => {
                   onClick={() => setPostType('image')}
                   className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                     postType === 'image'
-                      ? 'bg-white dark:bg-zinc-800 text-rose-500 shadow-xs'
+                      ? 'bg-white dark:bg-zinc-800 text-violet-600 dark:text-violet-400 font-bold shadow-xs'
                       : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white'
                   }`}
                 >
@@ -807,7 +807,7 @@ export const MobileCreatePostPage: React.FC = () => {
                   onClick={() => setPostType('carousel')}
                   className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                     postType === 'carousel'
-                      ? 'bg-white dark:bg-zinc-800 text-rose-500 shadow-xs'
+                      ? 'bg-white dark:bg-zinc-800 text-violet-600 dark:text-violet-400 font-bold shadow-xs'
                       : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white'
                   }`}
                 >
@@ -822,14 +822,14 @@ export const MobileCreatePostPage: React.FC = () => {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Describe what you want to post (e.g. Girl and boy in separate cards, same pose, cafe-themed background...)"
-              className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-2xl p-3.5 text-xs text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:outline-none focus:border-rose-500 leading-relaxed transition-colors font-sans"
+              className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-2xl p-3.5 text-xs text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:outline-none focus:border-violet-600 leading-relaxed transition-colors font-sans"
             />
 
             {/* Primary Action Button */}
             <button
               onClick={handleGenerateAI}
               disabled={isGenerating}
-              className="w-full py-3.5 px-4 rounded-2xl ig-gradient text-white text-xs font-bold shadow-md hover:brightness-110 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-xs font-bold shadow-md hover:brightness-110 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
             >
               {isGenerating ? (
                 <>
@@ -875,7 +875,7 @@ export const MobileCreatePostPage: React.FC = () => {
                   {postType === 'carousel' ? 'Carousel Visuals' : 'Generated Image'}
                 </span>
 
-                <label className="text-xs font-semibold text-rose-500 hover:text-rose-600 flex items-center gap-1 cursor-pointer">
+                <label className="text-xs font-semibold text-violet-600 dark:text-violet-400 hover:text-violet-500 flex items-center gap-1 cursor-pointer">
                   <Upload className="w-3.5 h-3.5" />
                   <span>Upload Photo</span>
                   <input
@@ -890,9 +890,9 @@ export const MobileCreatePostPage: React.FC = () => {
               <div className="relative w-full aspect-[4/5] rounded-2xl overflow-hidden bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 shadow-sm flex items-center justify-center">
                 {isGenerating ? (
                   <div className="text-center p-6 space-y-3 w-full">
-                    <p className="text-3xl font-black text-rose-500 tabular-nums">{genProgress}%</p>
+                    <p className="text-3xl font-black text-violet-600 dark:text-violet-400 tabular-nums">{genProgress}%</p>
                     <div className="w-44 h-1.5 rounded-full bg-zinc-200 dark:bg-zinc-800 overflow-hidden mx-auto">
-                      <div className="h-full ig-gradient transition-all duration-300" style={{ width: `${genProgress}%` }} />
+                      <div className="h-full bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 transition-all duration-300" style={{ width: `${genProgress}%` }} />
                     </div>
                     <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
                       {genProgress < 35 ? 'Writing a caption for your description' : genProgress < 75 ? 'Creating the image' : 'Finishing the post'}
@@ -911,7 +911,7 @@ export const MobileCreatePostPage: React.FC = () => {
 
                     {postType === 'carousel' && (
                       <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] text-white font-medium flex items-center gap-1.5">
-                        <Layers className="w-3 h-3 text-rose-400" />
+                        <Layers className="w-3 h-3 text-violet-300" />
                         <span>
                           Slide {activeSlideIndex + 1} of {slides.length}
                         </span>
@@ -961,7 +961,7 @@ export const MobileCreatePostPage: React.FC = () => {
                       onClick={() => setActiveSlideIndex(idx)}
                       className={`relative aspect-[4/5] rounded-xl overflow-hidden border-2 transition-all cursor-pointer ${
                         activeSlideIndex === idx
-                          ? 'border-rose-500 scale-102 shadow-sm'
+                          ? 'border-violet-600 scale-102 shadow-sm'
                           : 'border-transparent opacity-60 hover:opacity-100'
                       }`}
                     >
@@ -1017,7 +1017,7 @@ export const MobileCreatePostPage: React.FC = () => {
                       onClick={() => handleSelectCaption(idx)}
                       className={`flex-1 py-1.5 px-2 rounded-lg text-[11px] font-semibold transition-all cursor-pointer truncate text-center ${
                         selectedCaptionIndex === idx
-                          ? 'bg-white dark:bg-zinc-800 text-rose-500 shadow-xs'
+                          ? 'bg-white dark:bg-zinc-800 text-violet-600 dark:text-violet-400 font-bold shadow-xs'
                           : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
                       }`}
                     >
@@ -1033,7 +1033,7 @@ export const MobileCreatePostPage: React.FC = () => {
                 value={generatedCaption || description}
                 onChange={(e) => setGeneratedCaption(e.target.value)}
                 placeholder="Caption will appear here..."
-                className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-2xl p-3 text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-rose-500 leading-relaxed font-sans"
+                className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-2xl p-3 text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-violet-600 leading-relaxed font-sans"
               />
             </div>
           )}
@@ -1045,7 +1045,7 @@ export const MobileCreatePostPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => (isAudioPlaying ? stopAudio() : playTrack(selectedSong))}
-                  className="w-10 h-10 rounded-2xl ig-gradient flex items-center justify-center text-white shrink-0 shadow-xs cursor-pointer"
+                  className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-violet-600 to-indigo-600 flex items-center justify-center text-white shrink-0 shadow-xs cursor-pointer"
                   title={isAudioPlaying ? 'Pause audio' : 'Play audio'}
                 >
                   {isAudioPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
@@ -1055,7 +1055,7 @@ export const MobileCreatePostPage: React.FC = () => {
                     <span className="text-xs font-bold text-zinc-900 dark:text-white truncate">
                       {selectedSong.title}
                     </span>
-                    <span className="text-[9px] px-1.5 py-0.2 rounded bg-rose-500/10 text-rose-500 font-semibold shrink-0">
+                    <span className="text-[9px] px-1.5 py-0.2 rounded bg-violet-500/10 text-violet-600 dark:text-violet-400 font-semibold shrink-0">
                       {selectedSong.vibe}
                     </span>
                   </div>
@@ -1083,7 +1083,7 @@ export const MobileCreatePostPage: React.FC = () => {
                     onClick={() => playTrack(track)}
                     className={`w-full text-left px-3 py-2 rounded-xl border text-xs cursor-pointer ${
                       selectedSong.audioUrl === track.audioUrl && selectedSong.title === track.title
-                        ? 'border-rose-500 bg-rose-500/10 text-zinc-900 dark:text-white'
+                        ? 'border-violet-600 bg-violet-500/10 text-zinc-900 dark:text-white font-semibold'
                         : 'border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-300'
                     }`}
                   >
@@ -1102,7 +1102,7 @@ export const MobileCreatePostPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setScheduleMode(scheduleMode === 'now' ? 'schedule' : 'now')}
-                className="text-xs font-semibold text-rose-500 hover:text-rose-600 flex items-center gap-1 cursor-pointer"
+                className="text-xs font-semibold text-violet-600 dark:text-violet-400 hover:text-violet-500 flex items-center gap-1 cursor-pointer"
               >
                 <Clock className="w-3.5 h-3.5" />
                 <span>{scheduleMode === 'schedule' ? 'Publish Immediately' : 'Schedule for Later'}</span>
@@ -1118,7 +1118,7 @@ export const MobileCreatePostPage: React.FC = () => {
                   type="time"
                   value={scheduleTime}
                   onChange={(e) => setScheduleTime(e.target.value)}
-                  className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs text-zinc-900 dark:text-white font-medium focus:outline-none focus:border-rose-500"
+                  className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs text-zinc-900 dark:text-white font-medium focus:outline-none focus:border-violet-600"
                 />
               </div>
             )}
@@ -1126,7 +1126,7 @@ export const MobileCreatePostPage: React.FC = () => {
             <button
               onClick={handlePublishOrShare}
               disabled={isGenerating || (!currentPreviewImage && !description.trim())}
-              className="w-full py-3.5 px-4 rounded-2xl ig-gradient text-white text-xs font-bold shadow-lg hover:brightness-110 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-xs font-bold shadow-lg hover:brightness-110 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
             >
               <InstagramIcon className="w-4 h-4" />
               <span>
