@@ -5,9 +5,9 @@ import { BrandModel } from '../models/brandModel.js';
 export const brandRouter = Router();
 
 // GET /api/brand - Get logged-in user's brand profile
-brandRouter.get('/', requireAuth, (req: AuthenticatedRequest, res: Response): void => {
+brandRouter.get('/', requireAuth, async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
-    const brand = BrandModel.getByUserId(req.user!.id);
+    const brand = await BrandModel.getByUserId(req.user!.id);
     res.json({
       success: true,
       hasBrand: Boolean(brand),
@@ -22,7 +22,7 @@ brandRouter.get('/', requireAuth, (req: AuthenticatedRequest, res: Response): vo
 });
 
 // POST /api/brand - Create or update brand profile
-brandRouter.post('/', requireAuth, (req: AuthenticatedRequest, res: Response): void => {
+brandRouter.post('/', requireAuth, async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const { companyName, instagramHandle, bio, targetAudience, logoUrl, primaryColor } = req.body;
 
@@ -42,7 +42,7 @@ brandRouter.post('/', requireAuth, (req: AuthenticatedRequest, res: Response): v
       return;
     }
 
-    const brand = BrandModel.upsert(req.user!.id, {
+    const brand = await BrandModel.upsert(req.user!.id, {
       companyName,
       instagramHandle,
       bio,

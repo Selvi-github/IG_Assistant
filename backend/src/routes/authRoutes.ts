@@ -283,17 +283,21 @@ authRouter.get('/me', requireAuth, (req: AuthenticatedRequest, res: Response): v
 });
 
 // 11. Update User Profile
-authRouter.put('/profile', requireAuth, (req: AuthenticatedRequest, res: Response): void => {
+authRouter.put('/profile', requireAuth, async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const { fullName, brandName, instagramHandle, avatarUrl } = req.body;
-    UserModel.updateProfile(req.user!.id, {
+    await UserModel.updateProfile(req.user!.id, {
       fullName,
       brandName,
       instagramHandle,
       avatarUrl,
     });
 
-    const updated = UserModel.findUserById(req.user!.id)!;
+    const updated = await UserModel.findUserById(req.user!.id);
+    if (!updated) {
+      res.status(404).json({ success: false, error: 'User not found.' });
+      return;
+    }
     res.json({
       success: true,
       message: 'Profile updated successfully.',

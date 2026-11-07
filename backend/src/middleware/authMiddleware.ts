@@ -9,11 +9,11 @@ export interface AuthenticatedRequest extends Request {
   token?: string;
 }
 
-export const requireAuth = (
+export const requireAuth = async (
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
-): void => {
+): Promise<void> => {
   try {
     let token: string | undefined;
 
@@ -47,7 +47,7 @@ export const requireAuth = (
     }
 
     // Check DB session
-    const session = UserModel.findSession(token);
+    const session = await UserModel.findSession(token);
     if (!session) {
       res.status(401).json({
         success: false,
@@ -57,7 +57,7 @@ export const requireAuth = (
     }
 
     // Check user in DB
-    const user = UserModel.findUserById(payload.userId);
+    const user = await UserModel.findUserById(payload.userId);
     if (!user || user.status !== 'active') {
       res.status(401).json({
         success: false,
@@ -80,11 +80,11 @@ export const requireAuth = (
   }
 };
 
-export const optionalAuth = (
+export const optionalAuth = async (
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
-): void => {
+): Promise<void> => {
   try {
     let token: string | undefined;
 
@@ -100,7 +100,7 @@ export const optionalAuth = (
     if (token) {
       const payload = AuthService.verifyJwt(token);
       if (payload) {
-        const user = UserModel.findUserById(payload.userId);
+        const user = await UserModel.findUserById(payload.userId);
         if (user && user.status === 'active') {
           req.user = user;
           req.tokenPayload = payload;

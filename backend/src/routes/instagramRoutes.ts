@@ -38,7 +38,7 @@ instagramRouter.post('/connect-manual', requireAuth, async (req: AuthenticatedRe
 
     const cleanUsername = username.replace('@', '').trim();
 
-    const account = ConnectedAccountModel.upsertAccount(req.user!.id, {
+    const account = await ConnectedAccountModel.upsertAccount(req.user!.id, {
       platform: 'instagram',
       accountType: 'instagram_business',
       username: cleanUsername,
@@ -110,7 +110,7 @@ instagramRouter.post('/publish', requireAuth, async (req: AuthenticatedRequest, 
 instagramRouter.get('/status/:postId', requireAuth, async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const postId = String(req.params.postId);
-    const post = PostModel.getPostById(postId, req.user!.id);
+    const post = await PostModel.getPostById(postId, req.user!.id);
 
     if (!post) {
       res.status(404).json({ success: false, error: 'Post not found.' });

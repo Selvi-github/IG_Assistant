@@ -4,7 +4,7 @@ import cookieParser from 'cookie-parser';
 import path from 'path';
 import fs from 'fs';
 import { config } from './config/env.js';
-import { db } from './db/index.js';
+import { queryOne } from './db/index.js';
 import { authRouter } from './routes/authRoutes.js';
 import { brandRouter } from './routes/brandRoutes.js';
 import { postRouter } from './routes/postRoutes.js';
@@ -66,21 +66,21 @@ app.use((req, res, next) => {
 });
 
 // Health check endpoint
-app.get('/api/health', (req, res) => {
+app.get('/api/health', async (req, res) => {
   try {
     // Quick DB query check
-    const dbCheck = db.prepare('SELECT 1 as alive').get() as { alive: number };
-    const userCount = db.prepare('SELECT COUNT(*) as count FROM users').get() as { count: number };
+    const dbCheck = await queryOne('SELECT 1 as alive');
+    const userCount = await queryOne<{ count: string | number }>('SELECT COUNT(*) as count FROM users');
 
     res.json({
       status: 'healthy',
       uptime: process.uptime(),
       timestamp: new Date().toISOString(),
       database: {
-        connected: dbCheck?.alive === 1,
-        userCount: userCount?.count || 0,
-        type: 'SQLite (WAL mode)',
-        path: config.DB_PATH,
+        connected: Boolean(dbCheck),
+        userCount: Number(userCount?.count || 0),
+        type: config.DATABASE_URL ? 'PostgreSQL (Supabase/Cloud)' : 'SQLite (WAL mode)',
+        path: config.DATABASE_URL ? 'Cloud Pooler' : config.DB_PATH,
       },
       auth: {
         googleConfigured: GoogleAuthService.isConfigured(),
@@ -168,7 +168,7 @@ if (process.env.TEST_MODE !== 'true') {
   IG Assistant Backend Authentication Server
   Listening on: http://localhost:${config.PORT}
   Environment:  ${config.NODE_ENV}
-  Database:     ${config.DB_PATH}
+  Database:     ${config.DATABASE_URL ? 'PostgreSQL (Supabase/Cloud)' : config.DB_PATH}
   Google Auth:  ${GoogleAuthService.isConfigured() ? 'CONFIGURED' : 'NOT CONFIGURED (Provide GOOGLE_CLIENT_ID & SECRET in backend/.env)'}
   One-client host still needs: ${missing.length ? missing.join(', ') : 'nothing listed'}
 ======================================================

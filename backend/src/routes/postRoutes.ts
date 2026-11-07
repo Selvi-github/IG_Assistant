@@ -5,10 +5,10 @@ import { PostModel } from '../models/postModel.js';
 export const postRouter = Router();
 
 // GET /api/posts - Get logged-in user's posts & stats
-postRouter.get('/', requireAuth, (req: AuthenticatedRequest, res: Response): void => {
+postRouter.get('/', requireAuth, async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
-    const posts = PostModel.getPostsByUserId(req.user!.id);
-    const stats = PostModel.getStatsByUserId(req.user!.id);
+    const posts = await PostModel.getPostsByUserId(req.user!.id);
+    const stats = await PostModel.getStatsByUserId(req.user!.id);
 
     res.json({
       success: true,
@@ -24,7 +24,7 @@ postRouter.get('/', requireAuth, (req: AuthenticatedRequest, res: Response): voi
 });
 
 // POST /api/posts - Create post for logged-in user
-postRouter.post('/', requireAuth, (req: AuthenticatedRequest, res: Response): void => {
+postRouter.post('/', requireAuth, async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const { title, caption, hashtags, postType, status, scheduledFor, thumbnailUrl, mediaUrls } = req.body;
 
@@ -36,7 +36,7 @@ postRouter.post('/', requireAuth, (req: AuthenticatedRequest, res: Response): vo
       return;
     }
 
-    const post = PostModel.createPost(req.user!.id, {
+    const post = await PostModel.createPost(req.user!.id, {
       title,
       caption,
       hashtags,
@@ -61,12 +61,12 @@ postRouter.post('/', requireAuth, (req: AuthenticatedRequest, res: Response): vo
 });
 
 // PATCH /api/posts/:id - Update post status (published / scheduled)
-postRouter.patch('/:id', requireAuth, (req: AuthenticatedRequest, res: Response): void => {
+postRouter.patch('/:id', requireAuth, async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const postId = String(req.params.id);
     const { status, scheduledFor, publishedAt, thumbnailUrl } = req.body;
 
-    PostModel.updatePost(postId, req.user!.id, {
+    await PostModel.updatePost(postId, req.user!.id, {
       status,
       scheduledFor,
       publishedAt,
@@ -86,10 +86,10 @@ postRouter.patch('/:id', requireAuth, (req: AuthenticatedRequest, res: Response)
 });
 
 // DELETE /api/posts/:id - Delete post
-postRouter.delete('/:id', requireAuth, (req: AuthenticatedRequest, res: Response): void => {
+postRouter.delete('/:id', requireAuth, async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const postId = String(req.params.id);
-    PostModel.deletePost(postId, req.user!.id);
+    await PostModel.deletePost(postId, req.user!.id);
     res.json({
       success: true,
       message: 'Post deleted.',

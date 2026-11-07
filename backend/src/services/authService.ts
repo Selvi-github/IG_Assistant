@@ -84,7 +84,7 @@ export const AuthService = {
     }
 
     // Check duplicate
-    const existing = UserModel.findUserByEmail(cleanEmail);
+    const existing = await UserModel.findUserByEmail(cleanEmail);
     if (existing) {
       throw new Error('An account with this email address already exists. Please log in.');
     }
@@ -97,7 +97,7 @@ export const AuthService = {
     const verificationOtp = EmailService.generateOtp();
     const verificationExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
-    const user = UserModel.createUser({
+    const user = await UserModel.createUser({
       id: userId,
       email: cleanEmail,
       passwordHash,
@@ -119,8 +119,8 @@ export const AuthService = {
       sessionId,
     });
 
-    UserModel.createSession(sessionId, user.id, token, expiresAt);
-    UserModel.updateLastLogin(user.id);
+    await UserModel.createSession(sessionId, user.id, token, expiresAt);
+    await UserModel.updateLastLogin(user.id);
 
     return {
       user: toSafeUser(user),
@@ -141,9 +141,9 @@ export const AuthService = {
     let user: UserRecord | null = null;
 
     if (params.token) {
-      user = UserModel.findUserByVerificationToken(params.token);
+      user = await UserModel.findUserByVerificationToken(params.token);
     } else if (params.email && params.otp) {
-      user = UserModel.findUserByVerificationOtp(params.email, params.otp);
+      user = await UserModel.findUserByVerificationOtp(params.email, params.otp);
     }
 
     if (!user) {
@@ -157,14 +157,14 @@ export const AuthService = {
       }
     }
 
-    UserModel.markUserVerified(user.id);
-    const updated = UserModel.findUserById(user.id)!;
-    return { success: true, user: toSafeUser(updated) };
+    await UserModel.markUserVerified(user.id);
+    const updated = await UserModel.findUserById(user.id);
+    return { success: true, user: toSafeUser(updated!) };
   },
 
   // Resend verification
   async resendVerification(email: string): Promise<{ token: string; otp: string } | null> {
-    const user = UserModel.findUserByEmail(email);
+    const user = await UserModel.findUserByEmail(email);
     if (!user) {
       // Avoid user enumeration
       return null;
@@ -177,7 +177,7 @@ export const AuthService = {
     const verificationOtp = EmailService.generateOtp();
     const verificationExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
-    UserModel.setVerificationToken(user.id, verificationToken, verificationOtp, verificationExpiresAt);
+    await UserModel.setVerificationToken(user.id, verificationToken, verificationOtp, verificationExpiresAt);
     await EmailService.sendVerificationEmail(user.email, verificationToken, verificationOtp);
     return { token: verificationToken, otp: verificationOtp };
   },
@@ -196,7 +196,7 @@ export const AuthService = {
       throw new Error('Please provide both email and password.');
     }
 
-    const user = UserModel.findUserByEmail(cleanEmail);
+    const user = await UserModel.findUserByEmail(cleanEmail);
     if (!user) {
       throw new Error('Invalid email or password.');
     }
@@ -216,7 +216,7 @@ export const AuthService = {
 
     // Auto-verify user so they are never blocked from accessing their account
     if (user.is_verified === 0) {
-      UserModel.markUserVerified(user.id);
+      await UserModel.markUserVerified(user.id);
     }
 
     // Create session
@@ -228,8 +228,8 @@ export const AuthService = {
       sessionId,
     });
 
-    UserModel.createSession(sessionId, user.id, token, expiresAt);
-    UserModel.updateLastLogin(user.id);
+    await UserModel.createSession(sessionId, user.id, token, expiresAt);
+    await UserModel.updateLastLogin(user.id);
 
     return {
       user: toSafeUser(user),
@@ -241,7 +241,7 @@ export const AuthService = {
   // Forgot password
   async forgotPassword(email: string): Promise<void> {
     const cleanEmail = email.toLowerCase().trim();
-    const user = UserModel.findUserByEmail(cleanEmail);
+    const user = await UserModel.findUserByEmail(cleanEmail);
     if (!user) {
       // Do not disclose whether email exists
       return;
@@ -250,7 +250,7 @@ export const AuthService = {
     const resetToken = EmailService.generateToken();
     const resetExpiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1 hour
 
-    UserModel.setResetToken(user.id, resetToken, resetExpiresAt);
+    await UserModel.setResetToken(user.id, resetToken, resetExpiresAt);
     await EmailService.sendPasswordResetEmail(user.email, resetToken);
   },
 
@@ -265,7 +265,7 @@ export const AuthService = {
       throw new Error(passwordCheck.message);
     }
 
-    const user = UserModel.findUserByResetToken(token);
+    const user = await UserModel.findUserByResetToken(token);
     if (!user) {
       throw new Error('Invalid or expired password reset link. Please request a new one.');
     }
@@ -278,10 +278,10 @@ export const AuthService = {
     }
 
     const passwordHash = await this.hashPassword(newPassword);
-    UserModel.updatePassword(user.id, passwordHash);
+    await UserModel.updatePassword(user.id, passwordHash);
 
     // Invalidate existing sessions for security
-    UserModel.revokeAllUserSessions(user.id);
+    await UserModel.revokeAllUserSessions(user.id);
   },
 
   // Google OAuth Account Handler
@@ -293,22 +293,22 @@ export const AuthService = {
     const cleanEmail = profile.email.toLowerCase().trim();
 
     // 1. Try finding by Google ID
-    let user = UserModel.findUserByGoogleId(profile.googleId);
+    let user = await UserModel.findUserByGoogleId(profile.googleId);
 
     // 2. Try finding by email (account linking)
     if (!user) {
-      user = UserModel.findUserByEmail(cleanEmail);
+      user = await UserModel.findUserByEmail(cleanEmail);
       if (user) {
         // Link Google ID to existing account
-        UserModel.linkGoogleAccount(user.id, profile.googleId, profile.avatarUrl);
-        user = UserModel.findUserById(user.id)!;
+        await UserModel.linkGoogleAccount(user.id, profile.googleId, profile.avatarUrl);
+        user = await UserModel.findUserById(user.id);
       }
     }
 
     // 3. If new user, create account
     if (!user) {
       const userId = `usr_${crypto.randomUUID()}`;
-      user = UserModel.createUser({
+      user = await UserModel.createUser({
         id: userId,
         email: cleanEmail,
         passwordHash: null,
@@ -335,8 +335,8 @@ export const AuthService = {
       sessionId,
     });
 
-    UserModel.createSession(sessionId, user.id, token, expiresAt);
-    UserModel.updateLastLogin(user.id);
+    await UserModel.createSession(sessionId, user.id, token, expiresAt);
+    await UserModel.updateLastLogin(user.id);
 
     return {
       user: toSafeUser(user),
@@ -348,7 +348,6 @@ export const AuthService = {
   // Logout
   async logout(token: string): Promise<void> {
     if (!token) return;
-    UserModel.revokeSession(token);
+    await UserModel.revokeSession(token);
   },
 };
-

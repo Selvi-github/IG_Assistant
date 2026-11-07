@@ -1,4 +1,4 @@
-import { db } from '../db/index.js';
+import { query, queryOne, execute } from '../db/index.js';
 
 export interface UserRecord {
   id: string;
@@ -62,7 +62,7 @@ export const toSafeUser = (user: UserRecord): SafeUser => {
 };
 
 export const UserModel = {
-  createUser(params: {
+  async createUser(params: {
     id: string;
     email: string;
     passwordHash: string | null;
@@ -76,9 +76,9 @@ export const UserModel = {
     avatarUrl?: string | null;
     brandName?: string | null;
     instagramHandle?: string | null;
-  }): UserRecord {
+  }): Promise<UserRecord> {
     const now = new Date().toISOString();
-    const stmt = db.prepare(`
+    await execute(`
       INSERT INTO users (
         id, email, password_hash, full_name, google_id, auth_provider,
         is_verified, verification_token, verification_otp, verification_expires_at,
@@ -88,9 +88,7 @@ export const UserModel = {
         @is_verified, @verification_token, @verification_otp, @verification_expires_at,
         @avatar_url, @brand_name, @instagram_handle, 'active', @created_at, @updated_at
       )
-    `);
-
-    stmt.run({
+    `, {
       id: params.id,
       email: params.email.toLowerCase().trim(),
       password_hash: params.passwordHash,
@@ -108,142 +106,125 @@ export const UserModel = {
       updated_at: now,
     });
 
-    return UserModel.findUserById(params.id)!;
+    const created = await UserModel.findUserById(params.id);
+    return created!;
   },
 
-  findUserById(id: string): UserRecord | null {
-    const stmt = db.prepare('SELECT * FROM users WHERE id = ?');
-    return (stmt.get(id) as UserRecord) || null;
+  async findUserById(id: string): Promise<UserRecord | null> {
+    return queryOne<UserRecord>('SELECT * FROM users WHERE id = ?', [id]);
   },
 
-  findUserByEmail(email: string): UserRecord | null {
-    const stmt = db.prepare('SELECT * FROM users WHERE LOWER(email) = LOWER(?)');
-    return (stmt.get(email.trim()) as UserRecord) || null;
+  async findUserByEmail(email: string): Promise<UserRecord | null> {
+    return queryOne<UserRecord>('SELECT * FROM users WHERE LOWER(email) = LOWER(?)', [email.trim()]);
   },
 
-  findUserByGoogleId(googleId: string): UserRecord | null {
-    const stmt = db.prepare('SELECT * FROM users WHERE google_id = ?');
-    return (stmt.get(googleId) as UserRecord) || null;
+  async findUserByGoogleId(googleId: string): Promise<UserRecord | null> {
+    return queryOne<UserRecord>('SELECT * FROM users WHERE google_id = ?', [googleId]);
   },
 
-  findUserByVerificationToken(token: string): UserRecord | null {
-    const stmt = db.prepare('SELECT * FROM users WHERE verification_token = ?');
-    return (stmt.get(token) as UserRecord) || null;
+  async findUserByVerificationToken(token: string): Promise<UserRecord | null> {
+    return queryOne<UserRecord>('SELECT * FROM users WHERE verification_token = ?', [token]);
   },
 
-  findUserByVerificationOtp(email: string, otp: string): UserRecord | null {
-    const stmt = db.prepare('SELECT * FROM users WHERE LOWER(email) = LOWER(?) AND verification_otp = ?');
-    return (stmt.get(email.trim(), otp.trim()) as UserRecord) || null;
+  async findUserByVerificationOtp(email: string, otp: string): Promise<UserRecord | null> {
+    return queryOne<UserRecord>('SELECT * FROM users WHERE LOWER(email) = LOWER(?) AND verification_otp = ?', [email.trim(), otp.trim()]);
   },
 
-  findUserByResetToken(token: string): UserRecord | null {
-    const stmt = db.prepare('SELECT * FROM users WHERE reset_token = ?');
-    return (stmt.get(token) as UserRecord) || null;
+  async findUserByResetToken(token: string): Promise<UserRecord | null> {
+    return queryOne<UserRecord>('SELECT * FROM users WHERE reset_token = ?', [token]);
   },
 
-  setVerificationToken(id: string, token: string, otp: string, expiresAt: string): void {
+  async setVerificationToken(id: string, token: string, otp: string, expiresAt: string): Promise<void> {
     const now = new Date().toISOString();
-    const stmt = db.prepare(`
+    await execute(`
       UPDATE users
       SET verification_token = ?, verification_otp = ?, verification_expires_at = ?, updated_at = ?
       WHERE id = ?
-    `);
-    stmt.run(token, otp, expiresAt, now, id);
+    `, [token, otp, expiresAt, now, id]);
   },
 
-  markUserVerified(id: string): void {
+  async markUserVerified(id: string): Promise<void> {
     const now = new Date().toISOString();
-    const stmt = db.prepare(`
+    await execute(`
       UPDATE users
       SET is_verified = 1, verification_token = NULL, verification_otp = NULL, verification_expires_at = NULL, updated_at = ?
       WHERE id = ?
-    `);
-    stmt.run(now, id);
+    `, [now, id]);
   },
 
-  setResetToken(id: string, token: string, expiresAt: string): void {
+  async setResetToken(id: string, token: string, expiresAt: string): Promise<void> {
     const now = new Date().toISOString();
-    const stmt = db.prepare(`
+    await execute(`
       UPDATE users
       SET reset_token = ?, reset_expires_at = ?, updated_at = ?
       WHERE id = ?
-    `);
-    stmt.run(token, expiresAt, now, id);
+    `, [token, expiresAt, now, id]);
   },
 
-  updatePassword(id: string, passwordHash: string): void {
+  async updatePassword(id: string, passwordHash: string): Promise<void> {
     const now = new Date().toISOString();
-    const stmt = db.prepare(`
+    await execute(`
       UPDATE users
       SET password_hash = ?, reset_token = NULL, reset_expires_at = NULL, updated_at = ?
       WHERE id = ?
-    `);
-    stmt.run(passwordHash, now, id);
+    `, [passwordHash, now, id]);
   },
 
-  linkGoogleAccount(id: string, googleId: string, avatarUrl?: string | null): void {
+  async linkGoogleAccount(id: string, googleId: string, avatarUrl?: string | null): Promise<void> {
     const now = new Date().toISOString();
-    const stmt = db.prepare(`
+    await execute(`
       UPDATE users
       SET google_id = ?, avatar_url = COALESCE(avatar_url, ?), is_verified = 1, updated_at = ?
       WHERE id = ?
-    `);
-    stmt.run(googleId, avatarUrl || null, now, id);
+    `, [googleId, avatarUrl || null, now, id]);
   },
 
-  updateLastLogin(id: string): void {
+  async updateLastLogin(id: string): Promise<void> {
     const now = new Date().toISOString();
-    const stmt = db.prepare(`
+    await execute(`
       UPDATE users
       SET last_login_at = ?
       WHERE id = ?
-    `);
-    stmt.run(now, id);
+    `, [now, id]);
   },
 
-  updateProfile(id: string, updates: { fullName?: string; brandName?: string; instagramHandle?: string; avatarUrl?: string }): void {
+  async updateProfile(id: string, updates: { fullName?: string; brandName?: string; instagramHandle?: string; avatarUrl?: string }): Promise<void> {
     const now = new Date().toISOString();
-    const user = UserModel.findUserById(id);
+    const user = await UserModel.findUserById(id);
     if (!user) return;
 
-    const stmt = db.prepare(`
+    await execute(`
       UPDATE users
       SET full_name = ?, brand_name = ?, instagram_handle = ?, avatar_url = ?, updated_at = ?
       WHERE id = ?
-    `);
-    stmt.run(
+    `, [
       updates.fullName ?? user.full_name,
       updates.brandName ?? user.brand_name,
       updates.instagramHandle ?? user.instagram_handle,
       updates.avatarUrl ?? user.avatar_url,
       now,
       id
-    );
+    ]);
   },
 
   // Sessions management
-  createSession(id: string, userId: string, token: string, expiresAt: string): void {
+  async createSession(id: string, userId: string, token: string, expiresAt: string): Promise<void> {
     const now = new Date().toISOString();
-    const stmt = db.prepare(`
+    await execute(`
       INSERT INTO sessions (id, user_id, token, expires_at, created_at, revoked)
       VALUES (?, ?, ?, ?, ?, 0)
-    `);
-    stmt.run(id, userId, token, expiresAt, now);
+    `, [id, userId, token, expiresAt, now]);
   },
 
-  findSession(token: string): SessionRecord | null {
-    const stmt = db.prepare('SELECT * FROM sessions WHERE token = ? AND revoked = 0');
-    return (stmt.get(token) as SessionRecord) || null;
+  async findSession(token: string): Promise<SessionRecord | null> {
+    return queryOne<SessionRecord>('SELECT * FROM sessions WHERE token = ? AND revoked = 0', [token]);
   },
 
-  revokeSession(token: string): void {
-    const stmt = db.prepare('UPDATE sessions SET revoked = 1 WHERE token = ?');
-    stmt.run(token);
+  async revokeSession(token: string): Promise<void> {
+    await execute('UPDATE sessions SET revoked = 1 WHERE token = ?', [token]);
   },
 
-  revokeAllUserSessions(userId: string): void {
-    const stmt = db.prepare('UPDATE sessions SET revoked = 1 WHERE user_id = ?');
-    stmt.run(userId);
+  async revokeAllUserSessions(userId: string): Promise<void> {
+    await execute('UPDATE sessions SET revoked = 1 WHERE user_id = ?', [userId]);
   },
 };
-

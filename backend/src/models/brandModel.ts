@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { db } from '../db/index.js';
+import { queryOne, execute } from '../db/index.js';
 
 export interface BrandProfileRecord {
   id: string;
@@ -15,21 +15,20 @@ export interface BrandProfileRecord {
 }
 
 export const BrandModel = {
-  getByUserId(userId: string): BrandProfileRecord | null {
-    const stmt = db.prepare('SELECT * FROM brand_profiles WHERE user_id = ?');
-    return (stmt.get(userId) as BrandProfileRecord) || null;
+  async getByUserId(userId: string): Promise<BrandProfileRecord | null> {
+    return queryOne<BrandProfileRecord>('SELECT * FROM brand_profiles WHERE user_id = ?', [userId]);
   },
 
-  upsert(userId: string, data: {
+  async upsert(userId: string, data: {
     companyName: string;
     instagramHandle: string;
     bio?: string | null;
     targetAudience?: string | null;
     logoUrl?: string | null;
     primaryColor?: string;
-  }): BrandProfileRecord {
+  }): Promise<BrandProfileRecord> {
     const now = new Date().toISOString();
-    const existing = this.getByUserId(userId);
+    const existing = await this.getByUserId(userId);
 
     // Format handle to ensure it has leading @
     const rawHandle = data.instagramHandle.trim().replace(/^@+/, '');
@@ -37,7 +36,7 @@ export const BrandModel = {
     const cleanCompanyName = data.companyName.trim() || 'My Brand';
 
     if (existing) {
-      const stmt = db.prepare(`
+      await execute(`
         UPDATE brand_profiles
         SET company_name = ?,
             instagram_handle = ?,
@@ -47,8 +46,7 @@ export const BrandModel = {
             primary_color = ?,
             updated_at = ?
         WHERE user_id = ?
-      `);
-      stmt.run(
+      `, [
         cleanCompanyName,
         cleanHandle,
         data.bio ?? existing.bio,
@@ -57,18 +55,17 @@ export const BrandModel = {
         data.primaryColor ?? existing.primary_color,
         now,
         userId
-      );
+      ]);
     } else {
       const id = `brd_${crypto.randomUUID()}`;
-      const stmt = db.prepare(`
+      await execute(`
         INSERT INTO brand_profiles (
           id, user_id, company_name, instagram_handle, bio, target_audience,
           logo_url, primary_color, created_at, updated_at
         ) VALUES (
           ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
         )
-      `);
-      stmt.run(
+      `, [
         id,
         userId,
         cleanCompanyName,
@@ -76,24 +73,29 @@ export const BrandModel = {
         data.bio || null,
         data.targetAudience || 'Followers & Customers',
         data.logoUrl || null,
-        data.primaryColor || '#fb2175',
+        data.primaryColor || '#7c3aed',
         now,
         now
-      );
+      ]);
     }
 
     // Also synchronize to the users table
-    const updateUserStmt = db.prepare(`
+    await execute(`
       UPDATE users
       SET brand_name = ?,
           instagram_handle = ?,
           avatar_url = COALESCE(?, avatar_url),
           updated_at = ?
       WHERE id = ?
-    `);
-    updateUserStmt.run(cleanCompanyName, cleanHandle, data.logoUrl || null, now, userId);
+    `, [
+      cleanCompanyName,
+      cleanHandle,
+      data.logoUrl || null,
+      now,
+      userId
+    ]);
 
-    return this.getByUserId(userId)!;
+    const updated = await this.getByUserId(userId);
+    return updated!;
   },
 };
-

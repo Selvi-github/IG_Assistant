@@ -19,6 +19,7 @@ export const config = {
   GOOGLE_CLIENT_SECRET: getEnv('GOOGLE_CLIENT_SECRET', ''),
   GOOGLE_CALLBACK_URL: getEnv('GOOGLE_CALLBACK_URL', 'http://localhost:5000/api/auth/google/callback'),
   DB_PATH: path.resolve(process.cwd(), getEnv('DB_PATH', './data/ig_assistant.db')),
+  DATABASE_URL: getEnv('DATABASE_URL', '').trim(),
   HF_TOKEN: getEnv('HF_TOKEN', '').trim(),
   POLLINATIONS_API_KEY: getEnv('POLLINATIONS_API_KEY', '').trim(),
   COLAB_IMAGE_API_URL: getEnv('COLAB_IMAGE_API_URL', '').trim().replace(/\/$/, ''),

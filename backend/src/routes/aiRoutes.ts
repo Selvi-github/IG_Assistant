@@ -37,7 +37,7 @@ aiRouter.post('/captions', optionalAuth, async (req: AuthenticatedRequest, res: 
     let brandBio = req.body.brandBio || '';
 
     if (req.user?.id) {
-      const brand = BrandModel.getByUserId(req.user.id);
+      const brand = await BrandModel.getByUserId(req.user.id);
       if (brand?.company_name) brandName = brand.company_name;
       else if (req.user.brand_name) brandName = req.user.brand_name;
 
@@ -114,7 +114,7 @@ aiRouter.post('/generate', optionalAuth, async (req: AuthenticatedRequest, res: 
     let instagramHandle = req.body.instagramHandle || '@creator';
 
     if (req.user?.id) {
-      const brand = BrandModel.getByUserId(req.user.id);
+      const brand = await BrandModel.getByUserId(req.user.id);
       if (brand?.company_name) brandName = brand.company_name;
       else if (req.user.brand_name) brandName = req.user.brand_name;
 

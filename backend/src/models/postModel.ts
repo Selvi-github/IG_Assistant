@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { db } from '../db/index.js';
+import { query, queryOne, execute } from '../db/index.js';
 
 export interface PostRecord {
   id: string;
@@ -21,29 +21,27 @@ export interface PostRecord {
 }
 
 export const PostModel = {
-  getPostById(id: string, userId: string): PostRecord | null {
-    const stmt = db.prepare('SELECT * FROM posts WHERE id = ? AND user_id = ?');
-    return (stmt.get(id, userId) as PostRecord) || null;
+  async getPostById(id: string, userId: string): Promise<PostRecord | null> {
+    return queryOne<PostRecord>('SELECT * FROM posts WHERE id = ? AND user_id = ?', [id, userId]);
   },
 
-  getPostsByUserId(userId: string): PostRecord[] {
-    const stmt = db.prepare('SELECT * FROM posts WHERE user_id = ? ORDER BY created_at DESC');
-    return (stmt.all(userId) as PostRecord[]) || [];
+  async getPostsByUserId(userId: string): Promise<PostRecord[]> {
+    return query<PostRecord>('SELECT * FROM posts WHERE user_id = ? ORDER BY created_at DESC', [userId]);
   },
 
-  getStatsByUserId(userId: string): { scheduled: number; published: number; total: number } {
-    const scheduled = db.prepare("SELECT COUNT(*) as count FROM posts WHERE user_id = ? AND status = 'scheduled'").get(userId) as { count: number };
-    const published = db.prepare("SELECT COUNT(*) as count FROM posts WHERE user_id = ? AND status = 'published'").get(userId) as { count: number };
-    const total = db.prepare('SELECT COUNT(*) as count FROM posts WHERE user_id = ?').get(userId) as { count: number };
+  async getStatsByUserId(userId: string): Promise<{ scheduled: number; published: number; total: number }> {
+    const scheduled = await queryOne<{ count: string | number }>("SELECT COUNT(*) as count FROM posts WHERE user_id = ? AND status = 'scheduled'", [userId]);
+    const published = await queryOne<{ count: string | number }>("SELECT COUNT(*) as count FROM posts WHERE user_id = ? AND status = 'published'", [userId]);
+    const total = await queryOne<{ count: string | number }>('SELECT COUNT(*) as count FROM posts WHERE user_id = ?', [userId]);
 
     return {
-      scheduled: scheduled?.count || 0,
-      published: published?.count || 0,
-      total: total?.count || 0,
+      scheduled: Number(scheduled?.count || 0),
+      published: Number(published?.count || 0),
+      total: Number(total?.count || 0),
     };
   },
 
-  createPost(userId: string, data: {
+  async createPost(userId: string, data: {
     title: string;
     caption: string;
     hashtags?: string;
@@ -52,20 +50,18 @@ export const PostModel = {
     scheduledFor?: string | null;
     thumbnailUrl?: string | null;
     mediaUrls?: string | null;
-  }): PostRecord {
+  }): Promise<PostRecord> {
     const id = `pst_${crypto.randomUUID()}`;
     const now = new Date().toISOString();
 
-    const stmt = db.prepare(`
+    await execute(`
       INSERT INTO posts (
         id, user_id, title, caption, hashtags, post_type, status,
         scheduled_for, published_at, thumbnail_url, media_urls, created_at, updated_at
       ) VALUES (
         ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
       )
-    `);
-
-    stmt.run(
+    `, [
       id,
       userId,
       data.title.trim(),
@@ -79,17 +75,17 @@ export const PostModel = {
       data.mediaUrls || null,
       now,
       now
-    );
+    ]);
 
-    return db.prepare('SELECT * FROM posts WHERE id = ?').get(id) as PostRecord;
+    const created = await queryOne<PostRecord>('SELECT * FROM posts WHERE id = ?', [id]);
+    return created!;
   },
 
-  deletePost(id: string, userId: string): void {
-    const stmt = db.prepare('DELETE FROM posts WHERE id = ? AND user_id = ?');
-    stmt.run(id, userId);
+  async deletePost(id: string, userId: string): Promise<void> {
+    await execute('DELETE FROM posts WHERE id = ? AND user_id = ?', [id, userId]);
   },
 
-  updatePost(
+  async updatePost(
     id: string,
     userId: string,
     updates: {
@@ -101,7 +97,7 @@ export const PostModel = {
       instagramPermalink?: string | null;
       publishError?: string | null;
     }
-  ): void {
+  ): Promise<void> {
     const fields: string[] = ['updated_at = ?'];
     const values: any[] = [new Date().toISOString()];
 
@@ -135,8 +131,6 @@ export const PostModel = {
     }
 
     values.push(id, userId);
-    const stmt = db.prepare(`UPDATE posts SET ${fields.join(', ')} WHERE id = ? AND user_id = ?`);
-    stmt.run(...values);
+    await execute(`UPDATE posts SET ${fields.join(', ')} WHERE id = ? AND user_id = ?`, values);
   },
 };
-

@@ -30,11 +30,11 @@ export const InstagramPublishService = {
    * Validate if the user has an active connected Instagram professional account.
    */
   async getConnectedInstagramAccount(userId: string): Promise<ConnectedAccountRecord | null> {
-    let account = ConnectedAccountModel.getInstagramAccount(userId);
+    let account = await ConnectedAccountModel.getInstagramAccount(userId);
 
     // If no explicit DB record exists, check user's brand profile and env configuration
     if (!account) {
-      const brand = BrandModel.getByUserId(userId);
+      const brand = await BrandModel.getByUserId(userId);
       const handle = brand?.instagram_handle || '@creator';
       const cleanHandle = handle.replace('@', '');
 
@@ -42,7 +42,7 @@ export const InstagramPublishService = {
       const envToken = process.env.INSTAGRAM_ACCESS_TOKEN || process.env.META_ACCESS_TOKEN || null;
       const envBusinessId = process.env.INSTAGRAM_BUSINESS_ID || process.env.META_IG_USER_ID || null;
 
-      account = ConnectedAccountModel.upsertAccount(userId, {
+      account = await ConnectedAccountModel.upsertAccount(userId, {
         platform: 'instagram',
         accountType: 'instagram_business',
         instagramBusinessId: envBusinessId,
@@ -101,10 +101,10 @@ export const InstagramPublishService = {
       ? `${caption.trim()}\n\n${hashtags.trim()}`
       : caption.trim();
 
-    let post = PostModel.getPostById(postId, userId);
+    let post = await PostModel.getPostById(postId, userId);
     if (!post) {
       // Auto-create post record if called before async frontend persistence
-      post = PostModel.createPost(userId, {
+      post = await PostModel.createPost(userId, {
         title: caption.slice(0, 45) || 'Instagram Post',
         caption: fullCaption,
         hashtags: hashtags || undefined,
@@ -152,7 +152,7 @@ export const InstagramPublishService = {
         if (!containerRes.ok || containerData.error) {
           const err = containerData.error;
           const msg = `Meta API Container Error [${err?.code || containerRes.status}]: ${err?.message || 'Failed to create container'}`;
-          PostModel.updatePost(postId, userId, { publishError: msg });
+          await PostModel.updatePost(postId, userId, { publishError: msg });
           throw new Error(msg);
         }
 
@@ -226,7 +226,7 @@ export const InstagramPublishService = {
         const now = new Date().toISOString();
 
         // Step 5: Save to Database
-        PostModel.updatePost(postId, userId, {
+        await PostModel.updatePost(postId, userId, {
           status: 'published',
           publishedAt: now,
           instagramMediaId: igMediaId,
@@ -248,14 +248,14 @@ export const InstagramPublishService = {
         };
       } catch (metaErr: any) {
         console.error('[Meta Graph API Error]', metaErr);
-        PostModel.updatePost(postId, userId, {
+        await PostModel.updatePost(postId, userId, {
           publishError: metaErr.message || 'Meta API communication failed',
         });
         throw metaErr;
       }
     }
 
-    PostModel.updatePost(post.id, userId, {
+    await PostModel.updatePost(post.id, userId, {
       publishError: 'Instagram is not connected with a live access token.',
     });
     throw new Error(

@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { db } from '../db/index.js';
+import { query, queryOne, execute } from '../db/index.js';
 
 export interface ConnectedAccountRecord {
   id: string;
@@ -20,19 +20,18 @@ export interface ConnectedAccountRecord {
 }
 
 export const ConnectedAccountModel = {
-  getByUserId(userId: string): ConnectedAccountRecord[] {
-    const stmt = db.prepare('SELECT * FROM connected_accounts WHERE user_id = ? AND is_connected = 1');
-    return (stmt.all(userId) as ConnectedAccountRecord[]) || [];
+  async getByUserId(userId: string): Promise<ConnectedAccountRecord[]> {
+    return query<ConnectedAccountRecord>('SELECT * FROM connected_accounts WHERE user_id = ? AND is_connected = 1', [userId]);
   },
 
-  getInstagramAccount(userId: string): ConnectedAccountRecord | null {
-    const stmt = db.prepare(
-      "SELECT * FROM connected_accounts WHERE user_id = ? AND platform = 'instagram' AND is_connected = 1 LIMIT 1"
+  async getInstagramAccount(userId: string): Promise<ConnectedAccountRecord | null> {
+    return queryOne<ConnectedAccountRecord>(
+      "SELECT * FROM connected_accounts WHERE user_id = ? AND platform = 'instagram' AND is_connected = 1 LIMIT 1",
+      [userId]
     );
-    return (stmt.get(userId) as ConnectedAccountRecord) || null;
   },
 
-  upsertAccount(
+  async upsertAccount(
     userId: string,
     data: {
       platform: 'instagram' | 'facebook';
@@ -46,15 +45,16 @@ export const ConnectedAccountModel = {
       accessToken?: string | null;
       tokenExpiresAt?: string | null;
     }
-  ): ConnectedAccountRecord {
-    const existing = db
-      .prepare('SELECT id FROM connected_accounts WHERE user_id = ? AND platform = ? AND username = ?')
-      .get(userId, data.platform, data.username) as { id: string } | undefined;
+  ): Promise<ConnectedAccountRecord> {
+    const existing = await queryOne<{ id: string }>(
+      'SELECT id FROM connected_accounts WHERE user_id = ? AND platform = ? AND username = ?',
+      [userId, data.platform, data.username]
+    );
 
     const now = new Date().toISOString();
 
     if (existing) {
-      const stmt = db.prepare(`
+      await execute(`
         UPDATE connected_accounts SET
           account_type = ?,
           instagram_business_id = ?,
@@ -67,9 +67,7 @@ export const ConnectedAccountModel = {
           is_connected = 1,
           updated_at = ?
         WHERE id = ?
-      `);
-
-      stmt.run(
+      `, [
         data.accountType || 'instagram_business',
         data.instagramBusinessId || null,
         data.facebookPageId || null,
@@ -80,21 +78,20 @@ export const ConnectedAccountModel = {
         data.tokenExpiresAt || null,
         now,
         existing.id
-      );
+      ]);
 
-      return db.prepare('SELECT * FROM connected_accounts WHERE id = ?').get(existing.id) as ConnectedAccountRecord;
+      const updated = await queryOne<ConnectedAccountRecord>('SELECT * FROM connected_accounts WHERE id = ?', [existing.id]);
+      return updated!;
     }
 
     const id = `acc_${crypto.randomUUID()}`;
-    const stmt = db.prepare(`
+    await execute(`
       INSERT INTO connected_accounts (
         id, user_id, platform, account_type, instagram_business_id, facebook_page_id,
         username, account_name, avatar_url, followers_count, access_token, token_expires_at,
         is_connected, created_at, updated_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?)
-    `);
-
-    stmt.run(
+    `, [
       id,
       userId,
       data.platform,
@@ -109,14 +106,13 @@ export const ConnectedAccountModel = {
       data.tokenExpiresAt || null,
       now,
       now
-    );
+    ]);
 
-    return db.prepare('SELECT * FROM connected_accounts WHERE id = ?').get(id) as ConnectedAccountRecord;
+    const created = await queryOne<ConnectedAccountRecord>('SELECT * FROM connected_accounts WHERE id = ?', [id]);
+    return created!;
   },
 
-  disconnect(id: string, userId: string): void {
-    const stmt = db.prepare('UPDATE connected_accounts SET is_connected = 0, updated_at = ? WHERE id = ? AND user_id = ?');
-    stmt.run(new Date().toISOString(), id, userId);
+  async disconnect(id: string, userId: string): Promise<void> {
+    await execute('UPDATE connected_accounts SET is_connected = 0, updated_at = ? WHERE id = ? AND user_id = ?', [new Date().toISOString(), id, userId]);
   },
 };
-
