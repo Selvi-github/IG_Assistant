@@ -24,10 +24,13 @@ app.use(
       // Allow requests with no origin (like mobile apps, curl, automated test suites)
       if (!origin) return callback(null, true);
 
-      // Check allowed origins
-      const isAllowed = config.FRONTEND_URLS.some(
-        (allowed) => origin === allowed || allowed === '*' || origin.startsWith('http://localhost:')
-      );
+      // Check allowed origins (including any .onrender.com deployment automatically)
+      const isRender = origin.endsWith('.onrender.com');
+      const isAllowed =
+        isRender ||
+        config.FRONTEND_URLS.some(
+          (allowed) => origin === allowed || allowed === '*' || origin.startsWith('http://localhost:')
+        );
 
       const isLocal =
         origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:');
