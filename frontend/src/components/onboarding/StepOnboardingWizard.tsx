@@ -387,7 +387,7 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
           </div>
           <div>
             <h1 className="text-xs sm:text-sm font-black text-zinc-950 dark:text-white tracking-tight">
-              IG Assistant <span className="text-rose-500">·</span> Onboarding
+              IG Assistant <span className="text-indigo-600">·</span> Onboarding
             </h1>
             <p className="text-[10px] text-zinc-500 font-medium">
               Step {step} of {totalSteps}
@@ -439,7 +439,7 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
                   disabled={!isPassed && !isCurrent}
                   className={`flex items-center gap-1 px-2.5 py-1 rounded-full transition-all shrink-0 cursor-pointer text-xs ${
                     isCurrent
-                      ? 'bg-rose-500 text-white font-bold'
+                      ? 'bg-indigo-600 text-white font-bold'
                       : isPassed
                       ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold'
                       : 'bg-zinc-100 dark:bg-zinc-900 text-zinc-400 opacity-60'
@@ -448,7 +448,7 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
                   <span
                     className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[9px] font-bold ${
                       isCurrent
-                        ? 'bg-white text-rose-600'
+                        ? 'bg-white text-indigo-600'
                         : isPassed
                         ? 'bg-emerald-500 text-white'
                         : 'bg-zinc-300 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
@@ -479,14 +479,9 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
         {/* ================================================================= */}
         {step === 1 && (
           <div className="space-y-4 animate-in fade-in">
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-rose-500 bg-rose-500/10 px-2.5 py-0.5 rounded-full border border-rose-500/20">
-                Step 1 of 5
-              </span>
-              <h2 className="text-xl sm:text-2xl font-black text-zinc-950 dark:text-white mt-1.5 tracking-tight">
-                What is your business category?
-              </h2>
-            </div>
+            <h2 className="text-xl sm:text-2xl font-black text-zinc-950 dark:text-white tracking-tight">
+              What is your business category?
+            </h2>
 
             {/* Clean, compact options list (No icons, no emojis, no paragraphs) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -504,13 +499,13 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
                     }}
                     className={`p-3 rounded-xl border text-left text-xs font-semibold transition-all cursor-pointer flex items-center justify-between ${
                       isSelected
-                        ? 'border-rose-500 bg-rose-500/10 text-rose-600 dark:text-rose-400 font-bold ring-1 ring-rose-500'
+                        ? 'border-indigo-600 bg-indigo-50/80 dark:bg-indigo-950/40 text-indigo-950 dark:text-indigo-100 font-bold ring-2 ring-indigo-500/20 shadow-xs'
                         : 'border-zinc-200 dark:border-white/10 bg-white dark:bg-zinc-950 text-zinc-800 dark:text-zinc-200 hover:border-zinc-300'
                     }`}
                   >
                     <span>{cat.title}</span>
                     {isSelected && (
-                      <div className="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center shrink-0">
+                      <div className="w-4 h-4 rounded-full bg-indigo-600 text-white flex items-center justify-center shrink-0">
                         <Check className="w-2.5 h-2.5 stroke-[3]" />
                       </div>
                     )}
@@ -532,7 +527,7 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
                   setSelectedCategory('other');
                 }}
                 placeholder="Enter your business category (e.g. Photography, Crafts, Event Management)"
-                className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-rose-500"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600/30"
               />
             </div>
           </div>
@@ -543,14 +538,9 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
         {/* ================================================================= */}
         {step === 2 && (
           <div className="space-y-4 animate-in fade-in">
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-rose-500 bg-rose-500/10 px-2.5 py-0.5 rounded-full border border-rose-500/20">
-                Step 2 of 5
-              </span>
-              <h2 className="text-xl sm:text-2xl font-black text-zinc-950 dark:text-white mt-1.5 tracking-tight">
-                What type of content would you like to create?
-              </h2>
-            </div>
+            <h2 className="text-xl sm:text-2xl font-black text-zinc-950 dark:text-white tracking-tight">
+              What type of content would you like to create?
+            </h2>
 
             {/* Clean, compact options list (No icons, no emojis, no paragraphs) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -571,7 +561,7 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
                     }}
                     className={`p-3 rounded-xl border text-left text-xs font-semibold transition-all cursor-pointer flex items-center justify-between ${
                       isSelected
-                        ? 'border-rose-500 bg-rose-500/10 text-rose-600 dark:text-rose-400 font-bold ring-1 ring-rose-500'
+                        ? 'border-indigo-600 bg-indigo-50/80 dark:bg-indigo-950/40 text-indigo-950 dark:text-indigo-100 font-bold ring-2 ring-indigo-500/20 shadow-xs'
                         : 'border-zinc-200 dark:border-white/10 bg-white dark:bg-zinc-950 text-zinc-800 dark:text-zinc-200 hover:border-zinc-300'
                     }`}
                   >
@@ -579,7 +569,7 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
                     <div
                       className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 transition-colors ${
                         isSelected
-                          ? 'bg-rose-500 border-rose-500 text-white'
+                          ? 'bg-indigo-600 border-indigo-600 text-white'
                           : 'border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900'
                       }`}
                     >
@@ -595,7 +585,7 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
               <button
                 type="button"
                 onClick={() => setSelectedContentTypes(CONTENT_TYPES.map((t) => t.id))}
-                className="text-rose-500 font-semibold hover:underline cursor-pointer"
+                className="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline cursor-pointer"
               >
                 Select All
               </button>
@@ -608,14 +598,9 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
         {/* ================================================================= */}
         {step === 3 && (
           <div className="space-y-4 animate-in fade-in">
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-rose-500 bg-rose-500/10 px-2.5 py-0.5 rounded-full border border-rose-500/20">
-                Step 3 of 5
-              </span>
-              <h2 className="text-xl sm:text-2xl font-black text-zinc-950 dark:text-white mt-1.5 tracking-tight">
-                Who do you want to target with your content?
-              </h2>
-            </div>
+            <h2 className="text-xl sm:text-2xl font-black text-zinc-950 dark:text-white tracking-tight">
+              Who do you want to target with your content?
+            </h2>
 
             <div className="space-y-3.5">
               {/* Customer Type (No paragraph text) */}
@@ -633,7 +618,7 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
                         onClick={() => setCustomerType(item.id)}
                         className={`p-2.5 rounded-xl border text-left text-xs transition-all cursor-pointer ${
                           isSelected
-                            ? 'border-rose-500 bg-rose-500/10 text-rose-600 dark:text-rose-400 font-bold ring-1 ring-rose-500'
+                            ? 'border-indigo-600 bg-indigo-50/80 dark:bg-indigo-950/40 text-indigo-950 dark:text-indigo-100 font-bold ring-2 ring-indigo-500/20 shadow-xs'
                             : 'border-zinc-200 dark:border-white/10 bg-white dark:bg-zinc-950 text-zinc-700 dark:text-zinc-300'
                         }`}
                       >
@@ -665,7 +650,7 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
                         }}
                         className={`px-3 py-1.5 rounded-full text-xs transition-all cursor-pointer flex items-center gap-1 ${
                           isSelected
-                            ? 'bg-rose-500 text-white font-semibold'
+                            ? 'bg-indigo-600 text-white font-semibold shadow-xs'
                             : 'bg-white dark:bg-zinc-950 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-white/10'
                         }`}
                       >
@@ -724,7 +709,7 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
                         onClick={() => setTargetLocation(loc)}
                         className={`p-2 rounded-xl border text-center text-xs transition-all cursor-pointer ${
                           isSelected
-                            ? 'border-rose-500 bg-rose-500/10 text-rose-600 dark:text-rose-400 font-bold'
+                            ? 'border-indigo-600 bg-indigo-50/80 dark:bg-indigo-950/40 text-indigo-950 dark:text-indigo-100 font-bold ring-1 ring-indigo-500/30'
                             : 'border-zinc-200 dark:border-white/10 bg-white dark:bg-zinc-950 text-zinc-600 dark:text-zinc-400'
                         }`}
                       >
@@ -743,14 +728,9 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
         {/* ================================================================= */}
         {step === 4 && (
           <div className="space-y-4 animate-in fade-in">
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-rose-500 bg-rose-500/10 px-2.5 py-0.5 rounded-full border border-rose-500/20">
-                Step 4 of 5
-              </span>
-              <h2 className="text-xl sm:text-2xl font-black text-zinc-950 dark:text-white mt-1.5 tracking-tight">
-                Upload your brand logo
-              </h2>
-            </div>
+            <h2 className="text-xl sm:text-2xl font-black text-zinc-950 dark:text-white tracking-tight">
+              Upload your brand logo
+            </h2>
 
             <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 space-y-4">
               {/* Logo Preview & Upload Zone */}
@@ -769,7 +749,7 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
                 </div>
 
                 <div className="flex-1 w-full space-y-2">
-                  <div className="border border-dashed border-zinc-300 dark:border-zinc-800 rounded-xl p-4 text-center hover:border-rose-500 transition-colors relative">
+                  <div className="border border-dashed border-zinc-300 dark:border-zinc-800 rounded-xl p-4 text-center hover:border-indigo-500 transition-colors relative">
                     <input
                       type="file"
                       accept="image/png,image/jpeg,image/webp,image/svg+xml"
@@ -796,17 +776,17 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
                 </div>
               </div>
 
-              {/* Brand Name Input only (Removed duplicate Instagram Handle to avoid confusion) */}
+              {/* Brand Name Input only */}
               <div className="space-y-1 pt-2 border-t border-zinc-100 dark:border-zinc-900">
                 <label className="text-xs font-bold text-zinc-900 dark:text-white">
-                  Business / Brand Name <span className="text-rose-500">*</span>
+                  Business / Brand Name <span className="text-indigo-600">*</span>
                 </label>
                 <input
                   type="text"
                   value={brandName}
                   onChange={(e) => setBrandName(e.target.value)}
                   placeholder="e.g. Selvi Cafe, Apex Motors"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-rose-500 font-semibold"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600/30 font-semibold"
                 />
               </div>
             </div>
@@ -818,14 +798,9 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
         {/* ================================================================= */}
         {step === 5 && (
           <div className="space-y-4 animate-in fade-in">
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-rose-500 bg-rose-500/10 px-2.5 py-0.5 rounded-full border border-rose-500/20">
-                Step 5 of 5 · Required
-              </span>
-              <h2 className="text-xl sm:text-2xl font-black text-zinc-950 dark:text-white mt-1.5 tracking-tight">
-                Connect your Instagram Account
-              </h2>
-            </div>
+            <h2 className="text-xl sm:text-2xl font-black text-zinc-950 dark:text-white tracking-tight">
+              Connect your Instagram Account
+            </h2>
 
             <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 space-y-4">
               {/* Status Box if connected */}
@@ -858,7 +833,7 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
                       setIsInstagramVerified(false);
                       setVerifiedIgAccount('');
                     }}
-                    className="text-[11px] font-semibold text-zinc-500 hover:text-rose-500 underline cursor-pointer"
+                    className="text-[11px] font-semibold text-zinc-500 hover:text-indigo-600 underline cursor-pointer"
                   >
                     Change
                   </button>
@@ -879,7 +854,7 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
                           setIgAccountInput(val.startsWith('@') ? val : `@${val}`);
                         }}
                         placeholder="@yourbrand or yourbrand"
-                        className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-rose-500 font-semibold"
+                        className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600/30 font-semibold"
                       />
                     </div>
                   </div>
