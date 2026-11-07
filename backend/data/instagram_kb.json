@@ -1,0 +1,167 @@
+{
+  "categories": [
+    "creative_visual",
+    "lifestyle",
+    "cafe_beverage",
+    "humor_relatable",
+    "community_engagement",
+    "brand_voice"
+  ],
+  "entries": [
+    {
+      "id": "cv_01",
+      "category": "creative_visual",
+      "tags": ["split-card", "matching pose", "duo", "boy and girl", "parallel", "cards"],
+      "visual_concept": "Dual subjects in separate visual frames or cards sharing an identical pose",
+      "short_and_catchy": "Two cards. One frequency. Synchronized from head to toe.",
+      "creative_aesthetic": "Separated by the frame, connected by the posture. When two distinct perspectives mirror each other in effortless symmetry.",
+      "engaging_relatable": "Proof that you can be on completely separate cards and still match the exact same energy. Which side nailed the pose better?",
+      "hashtags": ["#VisualStorytelling", "#SplitFrame", "#MatchingEnergy", "#CreativePortraits", "#InSync"],
+      "commercial_intent": false
+    },
+    {
+      "id": "cv_02",
+      "category": "creative_visual",
+      "tags": ["minimalist", "silhouette", "shadow", "golden hour", "editorial"],
+      "visual_concept": "Minimalist silhouette against high-contrast golden sunlight",
+      "short_and_catchy": "Less noise, more light. Shadows speaking louder than words.",
+      "creative_aesthetic": "The art of being present without filling every empty corner. Where light ends and shape begins.",
+      "engaging_relatable": "Sometimes all you need is dramatic lighting and five quiet minutes. Save this angle for your next golden hour shoot.",
+      "hashtags": ["#MinimalistAesthetic", "#GoldenHourLight", "#ShadowPlay", "#EditorialVisuals"],
+      "commercial_intent": false
+    },
+    {
+      "id": "cv_03",
+      "category": "creative_visual",
+      "tags": ["monochrome", "street", "candid", "urban", "architecture"],
+      "visual_concept": "Black and white urban street photography with architectural geometry",
+      "short_and_catchy": "Raw concrete and quiet streets. High contrast, zero distractions.",
+      "creative_aesthetic": "Stripping color away reveals the geometry of city life. Every angle tells a story when the noise fades out.",
+      "engaging_relatable": "Does your camera roll have more architecture shots than selfies? Drop a comment if you always spot the symmetry first.",
+      "hashtags": ["#MonochromeVibes", "#UrbanAesthetics", "#StreetComposition", "#CleanFrames"],
+      "commercial_intent": false
+    },
+    {
+      "id": "cv_04",
+      "category": "creative_visual",
+      "tags": ["split-screen", "duality", "contrast", "mirror", "reflection"],
+      "visual_concept": "Side by side split composition contrasting two moods or perspectives",
+      "short_and_catchy": "Two moods, one reality. Duality captured in a single glance.",
+      "creative_aesthetic": "Juxtaposing calm with motion. A study in harmony through deliberate contrast.",
+      "engaging_relatable": "The two sides of Sunday afternoon: plans to conquer the world vs plans to stay right here. Which card are you today?",
+      "hashtags": ["#SplitScreenAesthetic", "#DualPerspectives", "#VisualHarmony", "#CreativeDirection"],
+      "commercial_intent": false
+    },
+    {
+      "id": "ls_01",
+      "category": "lifestyle",
+      "tags": ["morning routine", "sunlight", "slow living", "journaling", "peaceful"],
+      "visual_concept": "Gentle morning light, warm brew, open journal on a wooden table",
+      "short_and_catchy": "Slow mornings make long days feel effortless.",
+      "creative_aesthetic": "Golden light on fresh paper. Protecting the first hour of the day before the world demands your attention.",
+      "engaging_relatable": "Non-negotiable morning ritual: quiet room, warm drink, zero notifications. What is the one thing your morning cannot start without?",
+      "hashtags": ["#SlowLiving", "#MorningRitual", "#QuietMoments", "#IntentionalLiving"],
+      "commercial_intent": false
+    },
+    {
+      "id": "ls_02",
+      "category": "lifestyle",
+      "tags": ["travel", "coastal", "ocean", "nature", "breeze", "escape"],
+      "visual_concept": "Open sea horizon with soft coastal breeze and natural earth tones",
+      "short_and_catchy": "Reset button: pressed. Salt air and wide horizons.",
+      "creative_aesthetic": "Where the shoreline meets the sky, all background noise quietly dissolves. A reminder that simplicity is the highest luxury.",
+      "engaging_relatable": "Trading city traffic for ocean waves for the next 48 hours. When was the last time you took a real break from your phone?",
+      "hashtags": ["#CoastalEscapes", "#OceanMindset", "#TravelMoments", "#NatureReset"],
+      "commercial_intent": false
+    },
+    {
+      "id": "ls_03",
+      "category": "lifestyle",
+      "tags": ["workspace", "productivity", "desk setup", "minimal", "laptop"],
+      "visual_concept": "Clean organized desk setup with ambient light and creative tools",
+      "short_and_catchy": "Clear desk, clear direction. Deep work starts here.",
+      "creative_aesthetic": "Curating an environment where ideas have room to breathe. Form following function in every detail.",
+      "engaging_relatable": "Cleaning your desk just to feel like you have your entire life organized. Who else cannot focus until their space is reset?",
+      "hashtags": ["#DeskSetup", "#WorkspaceGoals", "#DeepWork", "#CreativeWorkspace"],
+      "commercial_intent": false
+    },
+    {
+      "id": "cb_01",
+      "category": "cafe_beverage",
+      "tags": ["espresso", "coffee", "artisan", "latte art", "cafe vibes"],
+      "visual_concept": "Freshly poured velvety flat white with precision latte art in a ceramic cup",
+      "short_and_catchy": "First sip hits different. Perfectly pulled, freshly poured.",
+      "creative_aesthetic": "Velvety microfoam over rich single-origin espresso. The quiet craft of brewing something meant to be savored slowly.",
+      "engaging_relatable": "The exact moment of comfort before the daily rush begins. How many cups in are you today?",
+      "hashtags": ["#CoffeeCulture", "#LatteArtDaily", "#CafeAesthetics", "#SpecialtyCoffee", "#CoffeeLovers"],
+      "commercial_intent": true
+    },
+    {
+      "id": "cb_02",
+      "category": "cafe_beverage",
+      "tags": ["iced coffee", "cold brew", "refreshing", "summer cafe", "drizzle"],
+      "visual_concept": "Layered iced cold brew swirling with oat milk over clear ice cubes",
+      "short_and_catchy": "Slow-steeped. Ice cold. The afternoon revival.",
+      "creative_aesthetic": "Watching the milk swirl through cold brew like liquid marble. Cool refreshment crafted for warmer afternoons.",
+      "engaging_relatable": "Cold brew season is not a season, it is a lifestyle. Are you team iced all year round or strictly hot coffee?",
+      "hashtags": ["#ColdBrewVibes", "#IcedCoffeeSeason", "#CafeMoments", "#CraftBeverage"],
+      "commercial_intent": true
+    },
+    {
+      "id": "cb_03",
+      "category": "cafe_beverage",
+      "tags": ["pastry", "bakery", "croissant", "cafe breakfast", "golden crust"],
+      "visual_concept": "Golden flaky artisan croissant paired with a steaming ceramic cappuccino",
+      "short_and_catchy": "Golden layers, buttery warmth, zero compromises.",
+      "creative_aesthetic": "Baked fresh at sunrise, served warm by eight. The timeless pairing of flaky pastry and balanced roast.",
+      "engaging_relatable": "Tell me you cannot walk past a fresh bakery display without ordering something. Flaky croissant or cinnamon roll with your brew?",
+      "hashtags": ["#ArtisanBakery", "#MorningPastry", "#CafeBreakfast", "#FreshlyBaked"],
+      "commercial_intent": true
+    },
+    {
+      "id": "hr_01",
+      "category": "humor_relatable",
+      "tags": ["friends", "duo", "same energy", "funny", "bestie", "matching"],
+      "visual_concept": "Two friends holding the exact same funny or dramatic pose together",
+      "short_and_catchy": "We share one single brain cell and it is dedicated to this pose.",
+      "creative_aesthetic": "Unspoken synchronization. When your friend matches your strange energy without asking a single question.",
+      "engaging_relatable": "Tag the person who will literally copy your pose in public without even questioning why we are doing it.",
+      "hashtags": ["#BestieMoments", "#SameEnergy", "#DuoVibes", "#UnspokenBond"],
+      "commercial_intent": false
+    },
+    {
+      "id": "hr_02",
+      "category": "humor_relatable",
+      "tags": ["expectation vs reality", "behind the scenes", "candid", "fail"],
+      "visual_concept": "The contrast between an ultra-posed photo and what actually happened behind the camera",
+      "short_and_catchy": "Swipe to see the 87 discarded outtakes behind this one photo.",
+      "creative_aesthetic": "The polish on the feed vs the unscripted laughter behind the lens. The second frame is always the real story.",
+      "engaging_relatable": "Taking 200 photos just to choose the very first one you took. Please tell me we are not the only ones who do this.",
+      "hashtags": ["#BehindTheScenes", "#Outtakes", "#RealInsta", "#RelatableCreator"],
+      "commercial_intent": false
+    },
+    {
+      "id": "ce_01",
+      "category": "community_engagement",
+      "tags": ["question", "carousel", "save this", "insights", "discussion"],
+      "visual_concept": "Multi-slide informative breakdown designed for saves and comment discussions",
+      "short_and_catchy": "Swipe through for the blueprint. Save this before your next project.",
+      "creative_aesthetic": "Distilling complex concepts into actionable visual frameworks. One insight per slide, zero filler.",
+      "engaging_relatable": "Which slide surprised you the most? Bookmark this carousel for when you plan your next campaign.",
+      "hashtags": ["#CreatorTips", "#SwipeToLearn", "#ContentFramework", "#KnowledgeShare"],
+      "commercial_intent": false
+    },
+    {
+      "id": "bv_01",
+      "category": "brand_voice",
+      "tags": ["brand story", "craft", "behind the brand", "mission", "values"],
+      "visual_concept": "Artisanal maker at work with raw materials showing precision and care",
+      "short_and_catchy": "Built with intention. Crafted with patience.",
+      "creative_aesthetic": "Every small detail is intentional. We believe quality should speak for itself before any words are said.",
+      "engaging_relatable": "We started with a simple belief: do one thing exceptionally well. What value is most important to you when choosing a brand?",
+      "hashtags": ["#BrandCraft", "#BehindTheCraft", "#QualityFirst", "#IntentionalWork"],
+      "commercial_intent": true
+    }
+  ]
+}
+

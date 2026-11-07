@@ -1,0 +1,103 @@
+import { Router, Response } from 'express';
+import { requireAuth, AuthenticatedRequest } from '../middleware/authMiddleware.js';
+import { PostModel } from '../models/postModel.js';
+
+export const postRouter = Router();
+
+// GET /api/posts - Get logged-in user's posts & stats
+postRouter.get('/', requireAuth, (req: AuthenticatedRequest, res: Response): void => {
+  try {
+    const posts = PostModel.getPostsByUserId(req.user!.id);
+    const stats = PostModel.getStatsByUserId(req.user!.id);
+
+    res.json({
+      success: true,
+      posts,
+      stats,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to retrieve posts.',
+    });
+  }
+});
+
+// POST /api/posts - Create post for logged-in user
+postRouter.post('/', requireAuth, (req: AuthenticatedRequest, res: Response): void => {
+  try {
+    const { title, caption, hashtags, postType, status, scheduledFor, thumbnailUrl, mediaUrls } = req.body;
+
+    if (!title || !caption) {
+      res.status(400).json({
+        success: false,
+        error: 'Post title and caption are required.',
+      });
+      return;
+    }
+
+    const post = PostModel.createPost(req.user!.id, {
+      title,
+      caption,
+      hashtags,
+      postType,
+      status,
+      scheduledFor,
+      thumbnailUrl,
+      mediaUrls,
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Post created successfully.',
+      post,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to create post.',
+    });
+  }
+});
+
+// PATCH /api/posts/:id - Update post status (published / scheduled)
+postRouter.patch('/:id', requireAuth, (req: AuthenticatedRequest, res: Response): void => {
+  try {
+    const postId = String(req.params.id);
+    const { status, scheduledFor, publishedAt, thumbnailUrl } = req.body;
+
+    PostModel.updatePost(postId, req.user!.id, {
+      status,
+      scheduledFor,
+      publishedAt,
+      thumbnailUrl,
+    });
+
+    res.json({
+      success: true,
+      message: 'Post updated.',
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to update post.',
+    });
+  }
+});
+
+// DELETE /api/posts/:id - Delete post
+postRouter.delete('/:id', requireAuth, (req: AuthenticatedRequest, res: Response): void => {
+  try {
+    const postId = String(req.params.id);
+    PostModel.deletePost(postId, req.user!.id);
+    res.json({
+      success: true,
+      message: 'Post deleted.',
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to delete post.',
+    });
+  }
+});
