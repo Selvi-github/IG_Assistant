@@ -312,7 +312,7 @@ export const AiImageService = {
             28, // inference steps
           ],
         }),
-        signal: AbortSignal.timeout(20000),
+        signal: AbortSignal.timeout(10000),
       });
 
       if (!postRes.ok) {
@@ -327,7 +327,7 @@ export const AiImageService = {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        signal: AbortSignal.timeout(45000),
+        signal: AbortSignal.timeout(18000),
       });
 
       if (!resultRes.ok) return null;
@@ -390,7 +390,7 @@ export const AiImageService = {
             true,
           ],
         }),
-        signal: AbortSignal.timeout(15000),
+        signal: AbortSignal.timeout(8000),
       });
 
       if (!postRes.ok) {
@@ -405,7 +405,7 @@ export const AiImageService = {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        signal: AbortSignal.timeout(30000),
+        signal: AbortSignal.timeout(15000),
       });
 
       if (!resultRes.ok) return null;
@@ -461,7 +461,7 @@ export const AiImageService = {
           headers: {
             Authorization: `Bearer ${key}`,
           },
-          signal: AbortSignal.timeout(35000),
+          signal: AbortSignal.timeout(18000),
         });
 
         if (response.ok) {
@@ -545,13 +545,13 @@ export const AiImageService = {
     const colab = await this.fetchFromColab(clipped, seed);
     if (colab) return colab;
 
-    // 5. Resilient fallback models
-    const models = ['turbo', 'flux', 'sana', 'klein'];
+    // 5. Resilient fallback models (Fast timeouts to never hit Render 60s gateway timeout)
+    const models = ['turbo', 'flux', 'sana'];
 
     for (const model of models) {
       const url = this.getDiffusionImageUrl(clipped, seed, 1080, 1350, model);
       try {
-        const response = await fetch(url, { signal: AbortSignal.timeout(55000) });
+        const response = await fetch(url, { signal: AbortSignal.timeout(14000) });
         const type = response.headers.get('content-type') || '';
         if (response.ok && (type.includes('image') || type.includes('octet-stream'))) {
           const buffer = await response.arrayBuffer();
@@ -683,7 +683,7 @@ export const AiImageService = {
     const caption = primaryOption?.caption || cleanPrompt;
     const hashtags = primaryOption?.hashtags || ['#VisualStorytelling', '#InstagramAesthetic', '#CreativeDirection'];
 
-    // 2. Generate Real AI Visuals (Restored favorite algorithm)
+    // 2. Generate Real AI Visuals (Parallel generation for zero timeouts)
     const slides: CarouselSlide[] = [];
     const localImages: string[] = [];
     const publicMediaUrls: string[] = [];
@@ -699,43 +699,64 @@ export const AiImageService = {
       'final photograph of the same scene',
     ];
 
-    for (let i = 0; i < totalSlides; i++) {
-      const angle = angles[i] || angles[0];
-      const promptToUse = totalSlides === 1
-        ? cleanPrompt
-        : `${cleanPrompt}. Slide ${i + 1}: ${angle}`;
-      const enrichedPrompt = this.enhancePrompt(promptToUse, i === 0 ? 'cover' : 'insight');
-      const slideSeed = baseSeed + i * 23;
-      const buffer = await this.fetchImageBuffer(enrichedPrompt, slideSeed);
-      if (!buffer) {
-        if (slides.length > 0) break;
-        throw new Error('Could not create an image for that description. Please try again.');
-      }
-      const header = new Uint8Array(buffer);
-      const extension = header[0] === 0x89 && header[1] === 0x50
-        ? 'png'
-        : header[0] === 0x52 && header[1] === 0x49 && header[8] === 0x57
-          ? 'webp'
-          : 'jpg';
-      const fileName = `post_${timestamp}_slide_${i + 1}.${extension}`;
+    const slideIndices = Array.from({ length: totalSlides }, (_, idx) => idx);
+    const generatedSlides: (CarouselSlide | null)[] = await Promise.all(
+      slideIndices.map(async (i): Promise<CarouselSlide | null> => {
+        const angle = angles[i] || angles[0];
+        const promptToUse = totalSlides === 1
+          ? cleanPrompt
+          : `${cleanPrompt}. Slide ${i + 1}: ${angle}`;
+        const enrichedPrompt = this.enhancePrompt(promptToUse, i === 0 ? 'cover' : 'insight');
+        const slideSeed = baseSeed + i * 29;
+        let buffer = await this.fetchImageBuffer(enrichedPrompt, slideSeed);
 
-      const imagesDir = path.join(process.cwd(), 'data', 'generated_images');
-      if (!fs.existsSync(imagesDir)) fs.mkdirSync(imagesDir, { recursive: true });
-      fs.writeFileSync(path.join(imagesDir, fileName), Buffer.from(buffer));
-      const servedUrl = `/api/ai/images/${fileName}`;
-      publicMediaUrls.push(servedUrl);
-      localImages.push(servedUrl);
-      slides.push({
-        slideNumber: i + 1,
-        title: i === 0 ? baseTitle : `${baseTitle} ${i + 1}`,
-        subtitle: cleanPrompt.slice(0, 90),
-        imageUrl: servedUrl,
-        publicUrl: servedUrl,
-      });
+        if (!buffer) {
+          // Fast guaranteed fallback so carousel never fails
+          const fallbackUrl = this.getDiffusionImageUrl(enrichedPrompt.slice(0, 800), slideSeed, 1080, 1350, 'turbo');
+          try {
+            const resp = await fetch(fallbackUrl, { signal: AbortSignal.timeout(12000) });
+            if (resp.ok) buffer = await resp.arrayBuffer();
+          } catch {}
+        }
+
+        if (!buffer) {
+          return null;
+        }
+
+        const header = new Uint8Array(buffer);
+        const extension = header[0] === 0x89 && header[1] === 0x50
+          ? 'png'
+          : header[0] === 0x52 && header[1] === 0x49 && header[8] === 0x57
+            ? 'webp'
+            : 'jpg';
+        const fileName = `post_${timestamp}_slide_${i + 1}.${extension}`;
+
+        const imagesDir = path.join(process.cwd(), 'data', 'generated_images');
+        if (!fs.existsSync(imagesDir)) fs.mkdirSync(imagesDir, { recursive: true });
+        fs.writeFileSync(path.join(imagesDir, fileName), Buffer.from(buffer));
+        const servedUrl = `/api/ai/images/${fileName}`;
+
+        const slide: CarouselSlide = {
+          slideNumber: i + 1,
+          title: i === 0 ? baseTitle : `${baseTitle} ${i + 1}`,
+          subtitle: cleanPrompt.slice(0, 90),
+          imageUrl: servedUrl,
+          publicUrl: servedUrl,
+        };
+        return slide;
+      })
+    );
+
+    const validSlides: CarouselSlide[] = generatedSlides.filter((s): s is CarouselSlide => Boolean(s));
+
+    if (validSlides.length === 0) {
+      throw new Error('Could not create an image for that description. Please try again.');
     }
 
-    if (isCarousel && slides.length < 2) {
-      throw new Error('Only one slide came back. Please try the carousel again.');
+    for (const s of validSlides) {
+      slides.push(s);
+      localImages.push(s.imageUrl);
+      publicMediaUrls.push(s.publicUrl || s.imageUrl);
     }
 
     const track = await AudioService.pickForPrompt(cleanPrompt);

@@ -99,7 +99,7 @@ export const BrandKitPage: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">Instagram Handle</label>
+                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">Instagram Account or ID</label>
                 <input
                   type="text"
                   value={formData.handle}

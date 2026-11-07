@@ -3,26 +3,7 @@ import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import {
-  ShoppingBag,
-  Coffee,
-  GraduationCap,
-  Car,
-  Smartphone,
-  Dumbbell,
-  Sparkles,
-  Home as HomeIcon,
-  Briefcase,
-  Activity,
-  HelpCircle,
-  BookOpen,
-  BadgePercent,
-  Megaphone,
-  Layers,
-  Info,
-  Tv,
-  Flame,
-  MoreHorizontal,
-  CheckCircle2,
+  Check,
   ArrowRight,
   ArrowLeft,
   Upload,
@@ -30,10 +11,7 @@ import {
   Sun,
   Moon,
   LogOut,
-  Users,
-  ShieldCheck,
-  Check,
-  Image as ImageIcon,
+  CheckCircle2,
 } from 'lucide-react';
 import { InstagramIcon } from '@/components/icons/SocialIcons';
 
@@ -41,145 +19,39 @@ interface StepOnboardingWizardProps {
   onComplete: () => void;
 }
 
-// 1. Business Category Definitions
+// 1. Business Category Options (No emojis, no long paragraph texts)
 const BUSINESS_CATEGORIES = [
-  {
-    id: 'retail_boutique',
-    title: 'Retail, Boutique & Saree Shop',
-    desc: 'Silk sarees, ethnic wear, jewelry, clothing & luxury apparel',
-    icon: ShoppingBag,
-    defaultArt: 'luxury boutique showroom, draped silk sarees, bright studio lighting',
-  },
-  {
-    id: 'cafe_food',
-    title: 'Cafe, Bakery & Restaurant',
-    desc: 'Artisan cafes, coffee shops, fresh bakery, desserts & dining',
-    icon: Coffee,
-    defaultArt: 'artisan cafe, fresh gourmet pastries, specialty coffee, warm natural light',
-  },
-  {
-    id: 'education',
-    title: 'School, College & Education',
-    desc: 'Universities, engineering colleges, admissions & coaching academies',
-    icon: GraduationCap,
-    defaultArt: 'modern university campus, inspiring students, daylight academic architecture',
-  },
-  {
-    id: 'automotive',
-    title: 'Automotive & Vehicle Showroom',
-    desc: 'Sports bikes, luxury cars, motorcycle dealerships & service garages',
-    icon: Car,
-    defaultArt: 'luxury vehicle showroom, sports motorcycle, polished floor reflections',
-  },
-  {
-    id: 'electronics',
-    title: 'Electronics & Mobile Store',
-    desc: 'Smartphones, gadgets, laptops, consumer tech & repair centers',
-    icon: Smartphone,
-    defaultArt: 'modern electronics showroom, flagship smartphones, high-tech displays',
-  },
-  {
-    id: 'fitness_gym',
-    title: 'Fitness, Gym & Wellness',
-    desc: 'Gyms, yoga centers, personal training, athletics & nutrition',
-    icon: Dumbbell,
-    defaultArt: 'state of the art gym, athletic equipment, dynamic workout illumination',
-  },
-  {
-    id: 'beauty_salon',
-    title: 'Beauty, Salon & Cosmetics',
-    desc: 'Salons, spas, skincare clinics, cosmetics & aesthetic care',
-    icon: Sparkles,
-    defaultArt: 'luxury salon interior, premium skincare styling, soft aesthetic glow',
-  },
-  {
-    id: 'real_estate',
-    title: 'Real Estate & Interior Design',
-    desc: 'Properties, architecture, home decor, construction & villas',
-    icon: HomeIcon,
-    defaultArt: 'luxury architectural home, contemporary interior design, bright natural fill',
-  },
-  {
-    id: 'professional_services',
-    title: 'Professional Services & Consulting',
-    desc: 'Marketing agencies, IT consulting, accounting, corporate & legal',
-    icon: Briefcase,
-    defaultArt: 'modern creative studio agency, collaborative workspace, professional elegance',
-  },
-  {
-    id: 'healthcare',
-    title: 'Healthcare & Wellness Clinic',
-    desc: 'Clinics, dental practices, pharmacy & medical wellness',
-    icon: Activity,
-    defaultArt: 'clean modern medical clinic, trusted professional health environment',
-  },
-  {
-    id: 'other',
-    title: 'Other / Custom Business',
-    desc: 'Custom commercial enterprise or specialized niche',
-    icon: HelpCircle,
-    defaultArt: 'commercial master-grade product studio photography',
-  },
+  { id: 'retail_boutique', title: 'Retail, Boutique & Saree Shop' },
+  { id: 'cafe_food', title: 'Cafe, Bakery & Restaurant' },
+  { id: 'education', title: 'School, College & Education' },
+  { id: 'automotive', title: 'Automotive & Vehicle Showroom' },
+  { id: 'electronics', title: 'Electronics & Mobile Store' },
+  { id: 'fitness_gym', title: 'Fitness, Gym & Wellness' },
+  { id: 'beauty_salon', title: 'Beauty, Salon & Cosmetics' },
+  { id: 'real_estate', title: 'Real Estate & Interior Design' },
+  { id: 'professional_services', title: 'Professional Services & Consulting' },
+  { id: 'healthcare', title: 'Healthcare & Wellness Clinic' },
+  { id: 'other', title: 'Other' },
 ];
 
-// 2. Content Type Definitions
+// 2. Content Type Options (No emojis, no long paragraph texts)
 const CONTENT_TYPES = [
-  {
-    id: 'educational',
-    title: 'Educational Content',
-    desc: 'Tutorials, guides, industry tips & practical how-to knowledge',
-    icon: BookOpen,
-  },
-  {
-    id: 'promotional',
-    title: 'Promotional Content',
-    desc: 'Special discounts, promotional pricing & sales campaigns',
-    icon: BadgePercent,
-  },
-  {
-    id: 'brand_awareness',
-    title: 'Brand Awareness',
-    desc: 'Behind-the-scenes, founder stories & authentic brand identity',
-    icon: Megaphone,
-  },
-  {
-    id: 'product_marketing',
-    title: 'Product & Service Marketing',
-    desc: 'New arrivals, catalogs, feature spotlights & client showcases',
-    icon: Layers,
-  },
-  {
-    id: 'informational',
-    title: 'Informational Content',
-    desc: 'Industry news, updates, announcements & key facts',
-    icon: Info,
-  },
-  {
-    id: 'entertainment',
-    title: 'Entertainment Content',
-    desc: 'Relatable visual moments, lifestyle humor & trending hooks',
-    icon: Tv,
-  },
-  {
-    id: 'offers_announcements',
-    title: 'Offers & Announcements',
-    desc: 'Festival mega offers, seasonal discounts & event launches',
-    icon: Flame,
-  },
-  {
-    id: 'other_content',
-    title: 'Other',
-    desc: 'Tailored multi-format content strategy',
-    icon: MoreHorizontal,
-  },
+  { id: 'educational', title: 'Educational Content' },
+  { id: 'promotional', title: 'Promotional Content' },
+  { id: 'brand_awareness', title: 'Brand Awareness' },
+  { id: 'product_marketing', title: 'Product & Service Marketing' },
+  { id: 'informational', title: 'Informational Content' },
+  { id: 'entertainment', title: 'Entertainment Content' },
+  { id: 'offers_announcements', title: 'Offers & Announcements' },
+  { id: 'other_content', title: 'Other' },
 ];
 
-// 3. Target Audience Options
+// 3. Target Audience Options (Clean, simple chips)
 const CUSTOMER_TYPES = [
-  { id: 'local_walkin', label: 'Local Walk-In Customers', desc: 'Patrons visiting your physical store or local venue' },
-  { id: 'online_shoppers', label: 'Online Shoppers & E-Commerce', desc: 'Digital consumers purchasing goods or services remotely' },
-  { id: 'b2c_consumers', label: 'General B2C Consumers', desc: 'Everyday consumers following social trends and deals' },
-  { id: 'b2b_businesses', label: 'B2B Businesses & Clients', desc: 'Corporate buyers, companies, vendors & institutions' },
+  { id: 'local_walkin', label: 'Local Walk-In Customers' },
+  { id: 'online_shoppers', label: 'Online Shoppers & E-Commerce' },
+  { id: 'b2c_consumers', label: 'General B2C Consumers' },
+  { id: 'b2b_businesses', label: 'B2B Businesses & Clients' },
 ];
 
 const TARGET_ROLES = [
@@ -201,12 +73,6 @@ const AGE_GROUPS = [
   'Seniors (50+)',
 ];
 
-const GENDER_OPTIONS = [
-  { id: 'all', label: 'All Genders' },
-  { id: 'women', label: 'Primarily Women' },
-  { id: 'men', label: 'Primarily Men' },
-];
-
 const LOCATION_OPTIONS = [
   'Local City / Town',
   'Metro & Urban Areas',
@@ -217,7 +83,7 @@ const LOCATION_OPTIONS = [
 const STORAGE_KEY = 'ig_onboarding_draft';
 
 export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onComplete }) => {
-  const { brandKit, saveBrandProfile, connectAccount, triggerConfetti, addToast } = useApp();
+  const { brandKit, saveBrandProfile, connectAccount, addToast } = useApp();
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
 
@@ -227,10 +93,8 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
     if (draft) {
       try {
         const parsed = JSON.parse(draft);
-        if (parsed.currentStep) return parsed.currentStep;
-      } catch {
-        // ignore
-      }
+        if (parsed.currentStep && parsed.currentStep <= 5) return parsed.currentStep;
+      } catch {}
     }
     return 1;
   });
@@ -245,7 +109,15 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
     }
     return brandKit.businessCategory || 'retail_boutique';
   });
-  const [customCategory, setCustomCategory] = useState<string>('');
+  const [customCategory, setCustomCategory] = useState<string>(() => {
+    const draft = localStorage.getItem(STORAGE_KEY);
+    if (draft) {
+      try {
+        return JSON.parse(draft).customCategory || '';
+      } catch {}
+    }
+    return '';
+  });
 
   // Step 2: Content Types (Multi-select)
   const [selectedContentTypes, setSelectedContentTypes] = useState<string[]>(() => {
@@ -265,35 +137,41 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
     'Working Professionals',
   ]);
   const [selectedAges, setSelectedAges] = useState<string[]>(['Gen Z (18 - 24)', 'Millennials (25 - 34)']);
-  const [selectedGender, setSelectedGender] = useState<string>('all');
   const [targetLocation, setTargetLocation] = useState<string>('Local City / Town');
 
   // Step 4: Brand Logo & Identity
   const [brandName, setBrandName] = useState<string>(
     brandKit.brandName || user?.brandName || 'My Brand'
   );
-  const [instagramHandle, setInstagramHandle] = useState<string>(
-    brandKit.handle || user?.instagramHandle || '@creator'
-  );
   const [logoUrl, setLogoUrl] = useState<string>(brandKit.logoUrl || '');
-  const [isUploadingLogo, setIsUploadingLogo] = useState<boolean>(false);
 
   // Step 5: Instagram Connection
-  const [igConnectHandle, setIgConnectHandle] = useState<string>(
-    brandKit.handle || user?.instagramHandle || '@creator'
+  const [igAccountInput, setIgAccountInput] = useState<string>(
+    brandKit.handle || user?.instagramHandle || ''
   );
   const [isVerifyingInstagram, setIsVerifyingInstagram] = useState<boolean>(false);
-  const [isInstagramVerified, setIsInstagramVerified] = useState<boolean>(false);
-  const [igAccountDetails, setIgAccountDetails] = useState<{
-    username: string;
-    accountName: string;
-    followersCount: number;
-    avatarUrl: string;
-  } | null>(null);
+  const [isInstagramVerified, setIsInstagramVerified] = useState<boolean>(() => {
+    const draft = localStorage.getItem(STORAGE_KEY);
+    if (draft) {
+      try {
+        return !!JSON.parse(draft).isInstagramVerified;
+      } catch {}
+    }
+    return false;
+  });
+  const [verifiedIgAccount, setVerifiedIgAccount] = useState<string>(() => {
+    const draft = localStorage.getItem(STORAGE_KEY);
+    if (draft) {
+      try {
+        return JSON.parse(draft).verifiedIgAccount || '';
+      } catch {}
+    }
+    return brandKit.handle || '';
+  });
 
-  // Step 6: Final Integration state
-  const [integrationProgress, setIntegrationProgress] = useState<number>(0);
-  const [isFinalizing, setIsFinalizing] = useState<boolean>(false);
+  // Center Progress Bar Transition State
+  const [isFinishing, setIsFinishing] = useState<boolean>(false);
+  const [setupProgress, setSetupProgress] = useState<number>(0);
 
   // Save draft whenever state changes
   useEffect(() => {
@@ -306,12 +184,11 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
         customerType,
         selectedRoles,
         selectedAges,
-        selectedGender,
         targetLocation,
         brandName,
-        instagramHandle,
         logoUrl: logoUrl.length > 50000 ? '' : logoUrl,
         isInstagramVerified,
+        verifiedIgAccount,
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
     } catch {}
@@ -323,12 +200,11 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
     customerType,
     selectedRoles,
     selectedAges,
-    selectedGender,
     targetLocation,
     brandName,
-    instagramHandle,
     logoUrl,
     isInstagramVerified,
+    verifiedIgAccount,
   ]);
 
   // Handle Logo Upload
@@ -341,15 +217,12 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
       return;
     }
 
-    setIsUploadingLogo(true);
     const reader = new FileReader();
     reader.onload = () => {
       setLogoUrl(reader.result as string);
-      setIsUploadingLogo(false);
-      addToast('Brand logo uploaded successfully!', 'success');
+      addToast('Brand logo uploaded successfully.', 'success');
     };
     reader.onerror = () => {
-      setIsUploadingLogo(false);
       addToast('Failed to load logo image.', 'error');
     };
     reader.readAsDataURL(file);
@@ -377,97 +250,85 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
       ctx.fillText(initial, 128, 134);
 
       setLogoUrl(canvas.toDataURL('image/png'));
-      addToast(`Generated monogram logo for ${brandName}!`, 'success');
+      addToast(`Generated monogram logo for ${brandName}.`, 'success');
     }
   };
 
   // Step 5: Connect and Verify Instagram Account
   const handleConnectInstagram = () => {
-    const clean = igConnectHandle.trim().replace(/^@+/, '');
-    if (!clean || clean.length < 2) {
-      addToast('Please enter a valid Instagram handle (e.g. @yourbrand).', 'error');
+    const clean = igAccountInput.trim().replace(/^@+/, '');
+    // Standard Instagram username regex (1-30 characters, alphanumeric, dots, underscores)
+    const validPattern = /^[a-zA-Z0-9._]{1,30}$/;
+
+    if (!clean || !validPattern.test(clean)) {
+      addToast('Please enter a valid Instagram Account or ID (e.g. @yourbrand).', 'error');
       return;
     }
 
     setIsVerifyingInstagram(true);
     setTimeout(() => {
-      const verifiedHandle = `@${clean}`;
-      const followers = Math.floor(Math.random() * 8500 + 1200);
-      const verifiedDetails = {
-        username: clean,
-        accountName: brandName || clean,
-        followersCount: followers,
-        avatarUrl:
-          logoUrl ||
-          'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
-      };
-
-      setIgAccountDetails(verifiedDetails);
+      const formatted = `@${clean}`;
+      setVerifiedIgAccount(formatted);
       setIsInstagramVerified(true);
       setIsVerifyingInstagram(false);
-      setInstagramHandle(verifiedHandle);
 
-      // Register connection in AppContext
+      // Register connection in AppContext (clean without fake follower numbers)
       connectAccount('instagram', {
-        accountName: verifiedDetails.accountName,
+        accountName: brandName || clean,
         username: clean,
-        avatarUrl: verifiedDetails.avatarUrl,
-        followersCount: followers,
+        avatarUrl: logoUrl || '',
+        followersCount: 0,
         accountType: 'instagram_business',
         permissions: ['instagram_basic', 'instagram_content_publish', 'instagram_manage_insights'],
       });
 
-      addToast(`Verified Instagram Business Account: ${verifiedHandle}`, 'success');
-    }, 1200);
+      addToast(`Connected Instagram account: ${formatted}`, 'success');
+    }, 800);
   };
 
-  // Trigger step 6 completion animation
-  useEffect(() => {
-    if (step === 6) {
-      setIntegrationProgress(15);
-      const t1 = setTimeout(() => setIntegrationProgress(40), 400);
-      const t2 = setTimeout(() => setIntegrationProgress(75), 800);
-      const t3 = setTimeout(() => {
-        setIntegrationProgress(100);
-        triggerConfetti();
-      }, 1200);
-
-      return () => {
-        clearTimeout(t1);
-        clearTimeout(t2);
-        clearTimeout(t3);
-      };
+  // Final Transition: Centered Progress Bar and Redirect
+  const handleLaunchDashboard = () => {
+    if (!isInstagramVerified) {
+      addToast('Please connect your Instagram Account before proceeding.', 'error');
+      return;
     }
-  }, [step]);
 
-  // Step 7: Finalize and open Content Creation Dashboard
-  const handleFinalizeAndOpenDashboard = async () => {
-    setIsFinalizing(true);
+    setIsFinishing(true);
+    setSetupProgress(20);
 
-    const categoryObj = BUSINESS_CATEGORIES.find((c) => c.id === selectedCategory);
-    const categoryTitle =
-      selectedCategory === 'other' ? customCategory || 'Custom Business' : categoryObj?.title || 'Business';
+    const t1 = setTimeout(() => setSetupProgress(60), 300);
+    const t2 = setTimeout(() => setSetupProgress(95), 650);
+    const t3 = setTimeout(async () => {
+      setSetupProgress(100);
 
-    const targetAudienceSummary = `${customerType.replace(/_/g, ' ')} (${selectedRoles.join(', ')}), ${selectedAges.join(', ')}, ${targetLocation}`;
+      const categoryObj = BUSINESS_CATEGORIES.find((c) => c.id === selectedCategory);
+      const categoryTitle =
+        selectedCategory === 'other' ? customCategory.trim() || 'Custom Business' : categoryObj?.title || 'Business';
 
-    const bioSummary = `${categoryTitle} specializing in ${selectedContentTypes.map((c) => c.replace(/_/g, ' ')).join(', ')}.`;
+      const targetAudienceSummary = `${customerType.replace(/_/g, ' ')} (${selectedRoles.join(', ')}), ${selectedAges.join(', ')}, ${targetLocation}`;
+      const bioSummary = `${categoryTitle} specializing in ${selectedContentTypes.map((c) => c.replace(/_/g, ' ')).join(', ')}.`;
 
-    // 1. Save Brand Profile to Backend SQLite Database
-    await saveBrandProfile({
-      companyName: brandName.trim() || 'My Brand',
-      instagramHandle: instagramHandle.trim() || '@creator',
-      bio: bioSummary,
-      targetAudience: targetAudienceSummary,
-      logoUrl: logoUrl || null,
-    });
+      // 1. Save Brand Profile to SQLite Database
+      await saveBrandProfile({
+        companyName: brandName.trim() || 'My Brand',
+        instagramHandle: verifiedIgAccount.trim() || '@creator',
+        bio: bioSummary,
+        targetAudience: targetAudienceSummary,
+        logoUrl: logoUrl || null,
+      });
 
-    // 2. Mark complete and clean draft
-    localStorage.setItem('ig_assistant_onboarded', 'true');
-    localStorage.removeItem(STORAGE_KEY);
-    addToast('Onboarding completed! Welcome to your Content Creation Dashboard.', 'success');
+      // 2. Mark complete and clean draft
+      localStorage.setItem('ig_assistant_onboarded', 'true');
+      localStorage.removeItem(STORAGE_KEY);
 
-    setIsFinalizing(false);
-    onComplete();
+      onComplete();
+    }, 1000);
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+    };
   };
 
   // Validation helpers for Next button
@@ -478,63 +339,91 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
   const canProceedStep4 = brandName.trim().length >= 2;
   const canProceedStep5 = isInstagramVerified;
 
-  const totalSteps = 6;
+  const totalSteps = 5;
   const progressPercent = Math.round((step / totalSteps) * 100);
+
+  // If finishing, show a clean centered progress bar redirecting to home page
+  if (isFinishing) {
+    return (
+      <div className="min-h-screen bg-white dark:bg-black text-zinc-900 dark:text-zinc-100 flex flex-col items-center justify-center p-6 selection:bg-rose-500 selection:text-white">
+        <div className="w-full max-w-sm text-center space-y-5 animate-in fade-in zoom-in-95">
+          <div className="w-14 h-14 rounded-2xl ig-gradient flex items-center justify-center mx-auto text-white shadow-md">
+            <InstagramIcon className="w-8 h-8 text-white" />
+          </div>
+
+          <div className="space-y-1">
+            <h2 className="text-xl font-black text-zinc-950 dark:text-white tracking-tight">
+              Setting up your dashboard
+            </h2>
+            <p className="text-xs text-zinc-500">
+              Saving your business settings and connecting studio tools...
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <div className="h-2 w-full bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+              <div
+                className="h-full ig-gradient transition-all duration-300 rounded-full"
+                style={{ width: `${setupProgress}%` }}
+              />
+            </div>
+            <div className="flex justify-between text-[11px] font-semibold text-zinc-400">
+              <span>Configuring Studio</span>
+              <span>{setupProgress}%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-black text-zinc-900 dark:text-zinc-100 flex flex-col justify-between selection:bg-rose-500 selection:text-white transition-colors">
       {/* Top Header */}
-      <header className="sticky top-0 z-40 h-16 bg-white/95 dark:bg-black/95 backdrop-blur-xl border-b border-zinc-200 dark:border-white/10 px-4 sm:px-8 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl ig-gradient flex items-center justify-center p-2 shadow-sm text-white">
-            <InstagramIcon className="w-6 h-6 text-white" />
+      <header className="sticky top-0 z-40 h-14 bg-white/95 dark:bg-black/95 backdrop-blur-xl border-b border-zinc-200 dark:border-white/10 px-4 sm:px-8 flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl ig-gradient flex items-center justify-center p-1.5 shadow-xs text-white">
+            <InstagramIcon className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="text-sm font-black text-zinc-950 dark:text-white tracking-tight">
+            <h1 className="text-xs sm:text-sm font-black text-zinc-950 dark:text-white tracking-tight">
               IG Assistant <span className="text-rose-500">·</span> Onboarding
             </h1>
-            <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">
-              Step {step} of {totalSteps}:{' '}
-              {step === 1 && 'Select Business Category'}
-              {step === 2 && 'Select Content Type'}
-              {step === 3 && 'Select Target Audience'}
-              {step === 4 && 'Upload Brand Logo'}
-              {step === 5 && 'Connect Instagram'}
-              {step === 6 && 'Complete Account Integration'}
+            <p className="text-[10px] text-zinc-500 font-medium">
+              Step {step} of {totalSteps}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <button
             onClick={toggleTheme}
-            className="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-white/10 cursor-pointer"
+            className="p-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-white/10 cursor-pointer"
             title="Toggle Theme"
           >
-            {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-zinc-600" />}
+            {theme === 'dark' ? <Sun className="w-3.5 h-3.5 text-amber-400" /> : <Moon className="w-3.5 h-3.5 text-zinc-600" />}
           </button>
           <button
             onClick={logout}
-            className="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-900 text-zinc-500 hover:text-rose-500 border border-zinc-200 dark:border-white/10 cursor-pointer"
+            className="p-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-900 text-zinc-500 hover:text-rose-500 border border-zinc-200 dark:border-white/10 cursor-pointer"
             title="Sign Out"
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="w-3.5 h-3.5" />
           </button>
         </div>
       </header>
 
-      {/* Progress Bar & Stepper Indicator */}
-      <div className="w-full bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-white/10 px-4 sm:px-8 py-3">
-        <div className="max-w-4xl mx-auto space-y-2">
+      {/* Stepper Strip & Progress Track */}
+      <div className="w-full bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-white/10 px-4 sm:px-8 py-2.5">
+        <div className="max-w-2xl mx-auto space-y-2">
           {/* Stepper Pill Strip */}
-          <div className="flex items-center justify-between gap-1 sm:gap-2 overflow-x-auto pb-1 text-xs">
+          <div className="flex items-center justify-between gap-1 overflow-x-auto pb-0.5 text-xs">
             {[
               { num: 1, label: 'Category' },
               { num: 2, label: 'Content Type' },
               { num: 3, label: 'Audience' },
               { num: 4, label: 'Brand Logo' },
               { num: 5, label: 'Instagram' },
-              { num: 6, label: 'Integration' },
             ].map((s) => {
               const isPassed = step > s.num;
               const isCurrent = step === s.num;
@@ -548,16 +437,16 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
                     }
                   }}
                   disabled={!isPassed && !isCurrent}
-                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full transition-all shrink-0 cursor-pointer ${
+                  className={`flex items-center gap-1 px-2.5 py-1 rounded-full transition-all shrink-0 cursor-pointer text-xs ${
                     isCurrent
-                      ? 'bg-rose-500 text-white font-bold shadow-xs'
+                      ? 'bg-rose-500 text-white font-bold'
                       : isPassed
                       ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold'
                       : 'bg-zinc-100 dark:bg-zinc-900 text-zinc-400 opacity-60'
                   }`}
                 >
                   <span
-                    className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                    className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[9px] font-bold ${
                       isCurrent
                         ? 'bg-white text-rose-600'
                         : isPassed
@@ -567,14 +456,14 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
                   >
                     {isPassed ? <Check className="w-2.5 h-2.5 stroke-[3]" /> : s.num}
                   </span>
-                  <span className="hidden sm:inline">{s.label}</span>
+                  <span className="hidden sm:inline text-[11px]">{s.label}</span>
                 </button>
               );
             })}
           </div>
 
           {/* Progress Bar Track */}
-          <div className="h-1.5 w-full bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+          <div className="h-1 w-full bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
             <div
               className="h-full ig-gradient transition-all duration-300 rounded-full"
               style={{ width: `${progressPercent}%` }}
@@ -584,82 +473,68 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
       </div>
 
       {/* Main Step Content Container */}
-      <main className="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-8 flex flex-col justify-center">
+      <main className="flex-1 max-w-2xl w-full mx-auto p-4 sm:p-6 flex flex-col justify-center">
         {/* ================================================================= */}
         {/* STEP 1: Select Business Category */}
         {/* ================================================================= */}
         {step === 1 && (
-          <div className="space-y-6 animate-fadeIn">
+          <div className="space-y-4 animate-in fade-in">
             <div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-rose-500 bg-rose-500/10 px-2.5 py-1 rounded-full border border-rose-500/20">
-                Step 1 of 6
+              <span className="text-[10px] font-bold uppercase tracking-wider text-rose-500 bg-rose-500/10 px-2.5 py-0.5 rounded-full border border-rose-500/20">
+                Step 1 of 5
               </span>
-              <h2 className="text-2xl sm:text-3xl font-black text-zinc-950 dark:text-white mt-2 tracking-tight">
+              <h2 className="text-xl sm:text-2xl font-black text-zinc-950 dark:text-white mt-1.5 tracking-tight">
                 What is your business category?
               </h2>
-              <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-                Select the industry that best represents your business. Our AI adapts prompts, lighting, and composition specifically to your niche.
-              </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {/* Clean, compact options list (No icons, no emojis, no paragraphs) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {BUSINESS_CATEGORIES.map((cat) => {
-                const IconComponent = cat.icon;
                 const isSelected = selectedCategory === cat.id;
                 return (
                   <button
                     key={cat.id}
                     type="button"
-                    onClick={() => setSelectedCategory(cat.id)}
-                    className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between group ${
+                    onClick={() => {
+                      setSelectedCategory(cat.id);
+                      if (cat.id !== 'other') {
+                        setCustomCategory('');
+                      }
+                    }}
+                    className={`p-3 rounded-xl border text-left text-xs font-semibold transition-all cursor-pointer flex items-center justify-between ${
                       isSelected
-                        ? 'border-rose-500 bg-rose-500/5 dark:bg-rose-500/10 shadow-sm ring-2 ring-rose-500/20'
-                        : 'border-zinc-200 dark:border-white/10 bg-white dark:bg-zinc-950 hover:border-zinc-300 dark:hover:border-zinc-800'
+                        ? 'border-rose-500 bg-rose-500/10 text-rose-600 dark:text-rose-400 font-bold ring-1 ring-rose-500'
+                        : 'border-zinc-200 dark:border-white/10 bg-white dark:bg-zinc-950 text-zinc-800 dark:text-zinc-200 hover:border-zinc-300'
                     }`}
                   >
-                    <div>
-                      <div className="flex items-center justify-between mb-2.5">
-                        <div
-                          className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${
-                            isSelected
-                              ? 'bg-rose-500 text-white shadow-xs'
-                              : 'bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 group-hover:text-rose-500'
-                          }`}
-                        >
-                          <IconComponent className="w-5 h-5" />
-                        </div>
-                        {isSelected && (
-                          <div className="w-5 h-5 rounded-full bg-rose-500 text-white flex items-center justify-center">
-                            <Check className="w-3 h-3 stroke-[3]" />
-                          </div>
-                        )}
+                    <span>{cat.title}</span>
+                    {isSelected && (
+                      <div className="w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center shrink-0">
+                        <Check className="w-2.5 h-2.5 stroke-[3]" />
                       </div>
-                      <h3 className="text-sm font-bold text-zinc-900 dark:text-white leading-tight">
-                        {cat.title}
-                      </h3>
-                      <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1 line-clamp-2">
-                        {cat.desc}
-                      </p>
-                    </div>
+                    )}
                   </button>
                 );
               })}
             </div>
 
-            {selectedCategory === 'other' && (
-              <div className="p-4 rounded-2xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 space-y-2">
-                <label className="text-xs font-bold text-zinc-900 dark:text-white">
-                  Enter Your Custom Business Category:
-                </label>
-                <input
-                  type="text"
-                  value={customCategory}
-                  onChange={(e) => setCustomCategory(e.target.value)}
-                  placeholder="e.g. Handmade Pottery Studio, Solar Energy Installation"
-                  className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-rose-500"
-                />
-              </div>
-            )}
+            {/* Always visible input for custom / other business category */}
+            <div className="pt-2">
+              <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">
+                Other Business Category (or type your custom business):
+              </label>
+              <input
+                type="text"
+                value={customCategory}
+                onChange={(e) => {
+                  setCustomCategory(e.target.value);
+                  setSelectedCategory('other');
+                }}
+                placeholder="Enter your business category (e.g. Photography, Crafts, Event Management)"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-rose-500"
+              />
+            </div>
           </div>
         )}
 
@@ -667,22 +542,19 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
         {/* STEP 2: Select Content Type */}
         {/* ================================================================= */}
         {step === 2 && (
-          <div className="space-y-6 animate-fadeIn">
+          <div className="space-y-4 animate-in fade-in">
             <div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-rose-500 bg-rose-500/10 px-2.5 py-1 rounded-full border border-rose-500/20">
-                Step 2 of 6
+              <span className="text-[10px] font-bold uppercase tracking-wider text-rose-500 bg-rose-500/10 px-2.5 py-0.5 rounded-full border border-rose-500/20">
+                Step 2 of 5
               </span>
-              <h2 className="text-2xl sm:text-3xl font-black text-zinc-950 dark:text-white mt-2 tracking-tight">
+              <h2 className="text-xl sm:text-2xl font-black text-zinc-950 dark:text-white mt-1.5 tracking-tight">
                 What type of content would you like to create?
               </h2>
-              <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-                Choose one or more content goals. We calibrate post layouts, visual styles, and caption tones to match your strategy.
-              </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Clean, compact options list (No icons, no emojis, no paragraphs) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {CONTENT_TYPES.map((type) => {
-                const IconComponent = type.icon;
                 const isSelected = selectedContentTypes.includes(type.id);
                 return (
                   <button
@@ -697,43 +569,29 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
                         setSelectedContentTypes([...selectedContentTypes, type.id]);
                       }
                     }}
-                    className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex items-start gap-3.5 group ${
+                    className={`p-3 rounded-xl border text-left text-xs font-semibold transition-all cursor-pointer flex items-center justify-between ${
                       isSelected
-                        ? 'border-rose-500 bg-rose-500/5 dark:bg-rose-500/10 shadow-sm ring-2 ring-rose-500/20'
-                        : 'border-zinc-200 dark:border-white/10 bg-white dark:bg-zinc-950 hover:border-zinc-300 dark:hover:border-zinc-800'
+                        ? 'border-rose-500 bg-rose-500/10 text-rose-600 dark:text-rose-400 font-bold ring-1 ring-rose-500'
+                        : 'border-zinc-200 dark:border-white/10 bg-white dark:bg-zinc-950 text-zinc-800 dark:text-zinc-200 hover:border-zinc-300'
                     }`}
                   >
+                    <span>{type.title}</span>
                     <div
-                      className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                      className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 transition-colors ${
                         isSelected
-                          ? 'bg-rose-500 text-white shadow-xs'
-                          : 'bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 group-hover:text-rose-500'
+                          ? 'bg-rose-500 border-rose-500 text-white'
+                          : 'border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900'
                       }`}
                     >
-                      <IconComponent className="w-5 h-5" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-bold text-zinc-900 dark:text-white">{type.title}</h3>
-                        <div
-                          className={`w-5 h-5 rounded-md border flex items-center justify-center transition-colors ${
-                            isSelected
-                              ? 'bg-rose-500 border-rose-500 text-white'
-                              : 'border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900'
-                          }`}
-                        >
-                          {isSelected && <Check className="w-3.5 h-3.5 stroke-[3]" />}
-                        </div>
-                      </div>
-                      <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">{type.desc}</p>
+                      {isSelected && <Check className="w-2.5 h-2.5 stroke-[3]" />}
                     </div>
                   </button>
                 );
               })}
             </div>
 
-            <div className="flex items-center justify-between text-xs text-zinc-500 px-1">
-              <span>{selectedContentTypes.length} content types selected</span>
+            <div className="flex items-center justify-between text-xs text-zinc-500 px-1 pt-1">
+              <span>{selectedContentTypes.length} selected</span>
               <button
                 type="button"
                 onClick={() => setSelectedContentTypes(CONTENT_TYPES.map((t) => t.id))}
@@ -749,26 +607,23 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
         {/* STEP 3: Select Target Audience */}
         {/* ================================================================= */}
         {step === 3 && (
-          <div className="space-y-6 animate-fadeIn">
+          <div className="space-y-4 animate-in fade-in">
             <div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-rose-500 bg-rose-500/10 px-2.5 py-1 rounded-full border border-rose-500/20">
-                Step 3 of 6
+              <span className="text-[10px] font-bold uppercase tracking-wider text-rose-500 bg-rose-500/10 px-2.5 py-0.5 rounded-full border border-rose-500/20">
+                Step 3 of 5
               </span>
-              <h2 className="text-2xl sm:text-3xl font-black text-zinc-950 dark:text-white mt-2 tracking-tight">
+              <h2 className="text-xl sm:text-2xl font-black text-zinc-950 dark:text-white mt-1.5 tracking-tight">
                 Who do you want to target with your content?
               </h2>
-              <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-                Define your ideal customer audience. This guides the AI caption RAG engine and visual aesthetics.
-              </p>
             </div>
 
-            <div className="space-y-5">
-              {/* Customer Type */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-zinc-900 dark:text-white uppercase tracking-wider">
+            <div className="space-y-3.5">
+              {/* Customer Type (No paragraph text) */}
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-bold text-zinc-900 dark:text-white uppercase tracking-wider">
                   Customer Type
                 </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {CUSTOMER_TYPES.map((item) => {
                     const isSelected = customerType === item.id;
                     return (
@@ -776,14 +631,13 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
                         key={item.id}
                         type="button"
                         onClick={() => setCustomerType(item.id)}
-                        className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                        className={`p-2.5 rounded-xl border text-left text-xs transition-all cursor-pointer ${
                           isSelected
-                            ? 'border-rose-500 bg-rose-500/10 text-zinc-950 dark:text-white font-bold ring-1 ring-rose-500'
+                            ? 'border-rose-500 bg-rose-500/10 text-rose-600 dark:text-rose-400 font-bold ring-1 ring-rose-500'
                             : 'border-zinc-200 dark:border-white/10 bg-white dark:bg-zinc-950 text-zinc-700 dark:text-zinc-300'
                         }`}
                       >
-                        <div className="text-xs font-bold">{item.label}</div>
-                        <div className="text-[10px] text-zinc-500 mt-0.5">{item.desc}</div>
+                        {item.label}
                       </button>
                     );
                   })}
@@ -791,11 +645,11 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
               </div>
 
               {/* Target Demographic Role */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-zinc-900 dark:text-white uppercase tracking-wider">
-                  Target Demographic & Roles (Select Multiple)
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-bold text-zinc-900 dark:text-white uppercase tracking-wider">
+                  Target Demographic
                 </label>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   {TARGET_ROLES.map((role) => {
                     const isSelected = selectedRoles.includes(role);
                     return (
@@ -809,10 +663,10 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
                             setSelectedRoles([...selectedRoles, role]);
                           }
                         }}
-                        className={`px-3 py-1.5 rounded-full text-xs transition-all cursor-pointer flex items-center gap-1.5 ${
+                        className={`px-3 py-1.5 rounded-full text-xs transition-all cursor-pointer flex items-center gap-1 ${
                           isSelected
-                            ? 'bg-rose-500 text-white font-semibold shadow-xs'
-                            : 'bg-zinc-100 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-white/10 hover:border-zinc-300'
+                            ? 'bg-rose-500 text-white font-semibold'
+                            : 'bg-white dark:bg-zinc-950 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-white/10'
                         }`}
                       >
                         {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
@@ -824,11 +678,11 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
               </div>
 
               {/* Age Group */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-zinc-900 dark:text-white uppercase tracking-wider">
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-bold text-zinc-900 dark:text-white uppercase tracking-wider">
                   Age Groups
                 </label>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   {AGE_GROUPS.map((age) => {
                     const isSelected = selectedAges.includes(age);
                     return (
@@ -856,9 +710,9 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
               </div>
 
               {/* Target Location */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-zinc-900 dark:text-white uppercase tracking-wider">
-                  Target Geographic Location
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-bold text-zinc-900 dark:text-white uppercase tracking-wider">
+                  Location
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {LOCATION_OPTIONS.map((loc) => {
@@ -868,7 +722,7 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
                         key={loc}
                         type="button"
                         onClick={() => setTargetLocation(loc)}
-                        className={`p-2.5 rounded-xl border text-center text-xs transition-all cursor-pointer ${
+                        className={`p-2 rounded-xl border text-center text-xs transition-all cursor-pointer ${
                           isSelected
                             ? 'border-rose-500 bg-rose-500/10 text-rose-600 dark:text-rose-400 font-bold'
                             : 'border-zinc-200 dark:border-white/10 bg-white dark:bg-zinc-950 text-zinc-600 dark:text-zinc-400'
@@ -888,56 +742,53 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
         {/* STEP 4: Upload Brand Logo */}
         {/* ================================================================= */}
         {step === 4 && (
-          <div className="space-y-6 animate-fadeIn">
+          <div className="space-y-4 animate-in fade-in">
             <div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-rose-500 bg-rose-500/10 px-2.5 py-1 rounded-full border border-rose-500/20">
-                Step 4 of 6
+              <span className="text-[10px] font-bold uppercase tracking-wider text-rose-500 bg-rose-500/10 px-2.5 py-0.5 rounded-full border border-rose-500/20">
+                Step 4 of 5
               </span>
-              <h2 className="text-2xl sm:text-3xl font-black text-zinc-950 dark:text-white mt-2 tracking-tight">
+              <h2 className="text-xl sm:text-2xl font-black text-zinc-950 dark:text-white mt-1.5 tracking-tight">
                 Upload your brand logo
               </h2>
-              <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-                Your logo will be integrated into future post creations, slide footers, and your Studio profile.
-              </p>
             </div>
 
-            <div className="p-6 rounded-3xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 shadow-xs space-y-6">
+            <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 space-y-4">
               {/* Logo Preview & Upload Zone */}
-              <div className="flex flex-col sm:flex-row items-center gap-6">
+              <div className="flex flex-col sm:flex-row items-center gap-4">
                 <div className="shrink-0 flex flex-col items-center">
-                  <div className="w-24 h-24 rounded-3xl ig-ring p-1 relative overflow-hidden bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center shadow-md">
+                  <div className="w-20 h-20 rounded-2xl ig-ring p-1 relative overflow-hidden bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center shadow-xs">
                     {logoUrl ? (
-                      <img src={logoUrl} alt="Brand Logo" className="w-full h-full rounded-2xl object-cover" />
+                      <img src={logoUrl} alt="Brand Logo" className="w-full h-full rounded-xl object-cover" />
                     ) : (
-                      <div className="w-full h-full rounded-2xl ig-gradient flex items-center justify-center text-white text-3xl font-black">
+                      <div className="w-full h-full rounded-xl ig-gradient flex items-center justify-center text-white text-2xl font-black">
                         {(brandName[0] || 'B').toUpperCase()}
                       </div>
                     )}
                   </div>
-                  <span className="text-[10px] text-zinc-400 font-medium mt-1.5">Live Preview</span>
+                  <span className="text-[10px] text-zinc-400 font-medium mt-1">Logo Preview</span>
                 </div>
 
-                <div className="flex-1 w-full space-y-3">
-                  <div className="border-2 border-dashed border-zinc-300 dark:border-zinc-800 rounded-2xl p-5 text-center hover:border-rose-500 transition-colors relative">
+                <div className="flex-1 w-full space-y-2">
+                  <div className="border border-dashed border-zinc-300 dark:border-zinc-800 rounded-xl p-4 text-center hover:border-rose-500 transition-colors relative">
                     <input
                       type="file"
                       accept="image/png,image/jpeg,image/webp,image/svg+xml"
                       onChange={handleLogoUpload}
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     />
-                    <Upload className="w-6 h-6 text-zinc-400 mx-auto mb-1.5" />
+                    <Upload className="w-5 h-5 text-zinc-400 mx-auto mb-1" />
                     <p className="text-xs font-bold text-zinc-900 dark:text-white">
-                      Click to upload your logo file
+                      Click to upload logo
                     </p>
-                    <p className="text-[11px] text-zinc-500 mt-0.5">PNG, JPG, WEBP or SVG up to 5MB</p>
+                    <p className="text-[10px] text-zinc-500">PNG, JPG, WEBP or SVG up to 5MB</p>
                   </div>
 
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-[11px] text-zinc-500">Don't have a logo file ready?</span>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[11px] text-zinc-500">Don't have a logo file?</span>
                     <button
                       type="button"
                       onClick={handleGenerateMonogram}
-                      className="px-3 py-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-xs font-semibold text-zinc-700 dark:text-zinc-300 transition-colors cursor-pointer"
+                      className="px-2.5 py-1 rounded-lg bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 text-xs font-semibold text-zinc-700 dark:text-zinc-300 transition-colors cursor-pointer"
                     >
                       Generate Monogram
                     </button>
@@ -945,40 +796,18 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
                 </div>
               </div>
 
-              {/* Brand Name & Handle Inputs */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-zinc-100 dark:border-zinc-900">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-zinc-900 dark:text-white">
-                    Business / Brand Name <span className="text-rose-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={brandName}
-                    onChange={(e) => setBrandName(e.target.value)}
-                    placeholder="e.g. Selvi Cafe, Apex Motors"
-                    className="w-full px-4 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-rose-500 font-semibold"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-zinc-900 dark:text-white">
-                    Instagram Handle <span className="text-rose-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <InstagramIcon className="w-4 h-4 text-zinc-400 absolute left-3 top-3" />
-                    <input
-                      type="text"
-                      value={instagramHandle}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setInstagramHandle(val.startsWith('@') ? val : `@${val}`);
-                        setIgConnectHandle(val.startsWith('@') ? val : `@${val}`);
-                      }}
-                      placeholder="@yourbrand"
-                      className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-rose-500 font-semibold"
-                    />
-                  </div>
-                </div>
+              {/* Brand Name Input only (Removed duplicate Instagram Handle to avoid confusion) */}
+              <div className="space-y-1 pt-2 border-t border-zinc-100 dark:border-zinc-900">
+                <label className="text-xs font-bold text-zinc-900 dark:text-white">
+                  Business / Brand Name <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={brandName}
+                  onChange={(e) => setBrandName(e.target.value)}
+                  placeholder="e.g. Selvi Cafe, Apex Motors"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-rose-500 font-semibold"
+                />
               </div>
             </div>
           </div>
@@ -988,81 +817,69 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
         {/* STEP 5: Connect Instagram Account */}
         {/* ================================================================= */}
         {step === 5 && (
-          <div className="space-y-6 animate-fadeIn">
+          <div className="space-y-4 animate-in fade-in">
             <div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-rose-500 bg-rose-500/10 px-2.5 py-1 rounded-full border border-rose-500/20">
-                Step 5 of 6 · Mandatory Integration
+              <span className="text-[10px] font-bold uppercase tracking-wider text-rose-500 bg-rose-500/10 px-2.5 py-0.5 rounded-full border border-rose-500/20">
+                Step 5 of 5 · Required
               </span>
-              <h2 className="text-2xl sm:text-3xl font-black text-zinc-950 dark:text-white mt-2 tracking-tight">
+              <h2 className="text-xl sm:text-2xl font-black text-zinc-950 dark:text-white mt-1.5 tracking-tight">
                 Connect your Instagram Account
               </h2>
-              <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-                Link your Instagram Business or Creator account to activate automated publishing, carousel dispatch, and account analytics.
-              </p>
             </div>
 
-            <div className="p-6 rounded-3xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 shadow-sm space-y-6">
-              {/* Instagram Card Header */}
-              <div className="flex items-center gap-4 p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-white/10">
-                <div className="w-12 h-12 rounded-2xl ig-gradient flex items-center justify-center p-2.5 shadow-md shrink-0">
-                  <InstagramIcon className="w-7 h-7 text-white" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-black text-zinc-900 dark:text-white">
-                      Meta Graph API · Instagram Business
-                    </h3>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                      Official Meta Partner
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-zinc-500 mt-0.5">
-                    Requires Instagram Business or Creator account linked to Facebook Page
-                  </p>
-                </div>
-              </div>
-
-              {/* Status Box */}
-              {isInstagramVerified && igAccountDetails ? (
-                <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between">
+            <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 space-y-4">
+              {/* Status Box if connected */}
+              {isInstagramVerified ? (
+                <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full border-2 border-emerald-500 overflow-hidden shrink-0">
-                      <img src={igAccountDetails.avatarUrl} alt="IG Avatar" className="w-full h-full object-cover" />
+                    <div className="w-10 h-10 rounded-full border-2 border-emerald-500 overflow-hidden shrink-0 bg-white dark:bg-black flex items-center justify-center">
+                      {logoUrl ? (
+                        <img src={logoUrl} alt="IG Avatar" className="w-full h-full object-cover" />
+                      ) : (
+                        <InstagramIcon className="w-5 h-5 text-emerald-600" />
+                      )}
                     </div>
                     <div>
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-1">
                         <span className="text-xs font-black text-emerald-700 dark:text-emerald-300">
-                          @{igAccountDetails.username}
+                          {verifiedIgAccount}
                         </span>
-                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
                       </div>
                       <p className="text-[10px] text-emerald-600 dark:text-emerald-400">
-                        Instagram Creator Connected · {igAccountDetails.followersCount.toLocaleString()} followers
+                        Instagram Account Connected
                       </p>
                     </div>
                   </div>
 
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 bg-white dark:bg-black px-2.5 py-1 rounded-full border border-emerald-500/20">
-                    Verified
-                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsInstagramVerified(false);
+                      setVerifiedIgAccount('');
+                    }}
+                    className="text-[11px] font-semibold text-zinc-500 hover:text-rose-500 underline cursor-pointer"
+                  >
+                    Change
+                  </button>
                 </div>
               ) : (
-                <div className="space-y-4">
-                  <div className="space-y-1.5">
+                <div className="space-y-3">
+                  <div className="space-y-1">
                     <label className="text-xs font-bold text-zinc-900 dark:text-white">
-                      Instagram Business / Creator Handle:
+                      Enter your Instagram Account or ID:
                     </label>
                     <div className="relative">
-                      <InstagramIcon className="w-4 h-4 text-zinc-400 absolute left-3 top-3.5" />
+                      <InstagramIcon className="w-4 h-4 text-zinc-400 absolute left-3 top-3" />
                       <input
                         type="text"
-                        value={igConnectHandle}
+                        value={igAccountInput}
                         onChange={(e) => {
                           const val = e.target.value;
-                          setIgConnectHandle(val.startsWith('@') ? val : `@${val}`);
+                          setIgAccountInput(val.startsWith('@') ? val : `@${val}`);
                         }}
-                        placeholder="@yourbrand"
-                        className="w-full pl-9 pr-4 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-rose-500 font-semibold"
+                        placeholder="@yourbrand or yourbrand"
+                        className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-rose-500 font-semibold"
                       />
                     </div>
                   </div>
@@ -1071,165 +888,39 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
                     type="button"
                     onClick={handleConnectInstagram}
                     disabled={isVerifyingInstagram}
-                    className="w-full py-3.5 px-4 rounded-xl ig-gradient text-white text-xs font-bold shadow-md hover:brightness-110 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                    className="w-full py-2.5 px-4 rounded-xl ig-gradient text-white text-xs font-bold shadow-xs hover:brightness-110 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                   >
                     {isVerifyingInstagram ? (
                       <>
-                        <div className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
-                        <span>Verifying Meta Graph Handshake...</span>
+                        <div className="w-3.5 h-3.5 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                        <span>Verifying Account...</span>
                       </>
                     ) : (
-                      <>
-                        <ShieldCheck className="w-4 h-4" />
-                        <span>Connect & Verify Instagram Account</span>
-                      </>
+                      <span>Connect Instagram Account</span>
                     )}
                   </button>
-
-                  <div className="p-3 rounded-xl bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/20 flex items-start gap-2.5">
-                    <ShieldCheck className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-                    <p className="text-[11px] text-amber-700 dark:text-amber-400">
-                      <strong>Requirement:</strong> Your Instagram account must be connected to proceed. The Content Creation Dashboard is locked until integration is verified.
-                    </p>
-                  </div>
                 </div>
               )}
-            </div>
-          </div>
-        )}
-
-        {/* ================================================================= */}
-        {/* STEP 6: Complete Account Integration */}
-        {/* ================================================================= */}
-        {step === 6 && (
-          <div className="space-y-6 animate-fadeIn">
-            <div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-500 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
-                Step 6 of 6 · Final Step
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-black text-zinc-950 dark:text-white mt-2 tracking-tight">
-                Complete Account Integration
-              </h2>
-              <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-                Finalizing account configuration and saving your business settings to the database.
-              </p>
-            </div>
-
-            <div className="p-6 rounded-3xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 shadow-sm space-y-6">
-              {/* Animated Progress Bar */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-xs font-bold text-zinc-700 dark:text-zinc-300">
-                  <span>Configuration Progress</span>
-                  <span className="text-emerald-500 font-extrabold">{integrationProgress}%</span>
-                </div>
-                <div className="h-2 w-full bg-zinc-100 dark:bg-zinc-900 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-emerald-500 transition-all duration-500 rounded-full"
-                    style={{ width: `${integrationProgress}%` }}
-                  />
-                </div>
-              </div>
-
-              {/* Checklist */}
-              <div className="space-y-2.5">
-                {[
-                  {
-                    title: 'Business Category & Visual Art Direction',
-                    detail: BUSINESS_CATEGORIES.find((c) => c.id === selectedCategory)?.title || 'Custom',
-                    done: integrationProgress >= 20,
-                  },
-                  {
-                    title: 'Content Formats & Strategy Goals',
-                    detail: `${selectedContentTypes.length} content formats selected`,
-                    done: integrationProgress >= 40,
-                  },
-                  {
-                    title: 'Target Audience Profile',
-                    detail: `${customerType.replace(/_/g, ' ')} · ${selectedAges.join(', ')}`,
-                    done: integrationProgress >= 60,
-                  },
-                  {
-                    title: 'Brand Identity & Logo Storage',
-                    detail: `${brandName} (${instagramHandle})`,
-                    done: integrationProgress >= 80,
-                  },
-                  {
-                    title: 'Meta Graph API Instagram Verification',
-                    detail: `${instagramHandle} · Verified Business Creator`,
-                    done: integrationProgress >= 100,
-                  },
-                ].map((item, idx) => (
-                  <div
-                    key={idx}
-                    className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-white/5 flex items-center justify-between"
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div
-                        className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 transition-colors ${
-                          item.done
-                            ? 'bg-emerald-500 text-white'
-                            : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-400'
-                        }`}
-                      >
-                        <Check className="w-3 h-3 stroke-[3]" />
-                      </div>
-                      <div className="truncate">
-                        <div className="text-xs font-bold text-zinc-900 dark:text-white truncate">
-                          {item.title}
-                        </div>
-                        <div className="text-[10px] text-zinc-500 truncate">{item.detail}</div>
-                      </div>
-                    </div>
-                    {item.done ? (
-                      <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider shrink-0">
-                        Ready
-                      </span>
-                    ) : (
-                      <span className="text-[10px] text-zinc-400 shrink-0">Configuring...</span>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              {/* Final Launch Button */}
-              <button
-                type="button"
-                onClick={handleFinalizeAndOpenDashboard}
-                disabled={integrationProgress < 100 || isFinalizing}
-                className="w-full py-4 px-6 rounded-2xl ig-gradient text-white text-sm font-bold shadow-lg hover:brightness-110 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-              >
-                {isFinalizing ? (
-                  <>
-                    <div className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
-                    <span>Saving Profile & Launching Studio...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>Open Content Creation Dashboard</span>
-                    <ArrowRight className="w-4 h-4 stroke-[2.5]" />
-                  </>
-                )}
-              </button>
             </div>
           </div>
         )}
       </main>
 
       {/* Bottom Navigation Buttons (Next / Back) */}
-      <footer className="sticky bottom-0 z-40 bg-white/95 dark:bg-black/95 backdrop-blur-xl border-t border-zinc-200 dark:border-white/10 px-4 sm:px-8 py-3.5">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
+      <footer className="sticky bottom-0 z-40 bg-white/95 dark:bg-black/95 backdrop-blur-xl border-t border-zinc-200 dark:border-white/10 px-4 sm:px-8 py-3">
+        <div className="max-w-2xl mx-auto flex items-center justify-between">
           {/* Back Button */}
           <button
             type="button"
             onClick={() => setStep(Math.max(1, step - 1))}
-            disabled={step === 1 || isFinalizing}
-            className={`px-4 py-2.5 rounded-xl border text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+            disabled={step === 1}
+            className={`px-4 py-2 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
               step === 1
                 ? 'opacity-0 pointer-events-none'
                 : 'border-zinc-200 dark:border-white/10 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
             }`}
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-3.5 h-3.5" />
             <span>Back</span>
           </button>
 
@@ -1238,13 +929,13 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
             Step {step} of {totalSteps}
           </span>
 
-          {/* Next Button */}
-          {step < 6 ? (
+          {/* Next / Launch Button */}
+          {step < 5 ? (
             <button
               type="button"
               onClick={() => {
                 if (step === 1 && !canProceedStep1) {
-                  addToast('Please select a business category to continue.', 'error');
+                  addToast('Please select or enter a business category.', 'error');
                   return;
                 }
                 if (step === 2 && !canProceedStep2) {
@@ -1259,30 +950,29 @@ export const StepOnboardingWizard: React.FC<StepOnboardingWizardProps> = ({ onCo
                   addToast('Please enter your business or brand name.', 'error');
                   return;
                 }
-                if (step === 5 && !canProceedStep5) {
-                  addToast('You must connect and verify your Instagram account before continuing.', 'error');
-                  return;
-                }
                 setStep(step + 1);
               }}
               disabled={
                 (step === 1 && !canProceedStep1) ||
                 (step === 2 && !canProceedStep2) ||
                 (step === 3 && !canProceedStep3) ||
-                (step === 4 && !canProceedStep4) ||
-                (step === 5 && !canProceedStep5)
+                (step === 4 && !canProceedStep4)
               }
-              className="px-6 py-2.5 rounded-xl ig-gradient text-white text-xs font-bold shadow-md hover:brightness-110 active:scale-95 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-5 py-2 rounded-xl ig-gradient text-white text-xs font-bold shadow-xs hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span>Next</span>
-              {step === 5 && !canProceedStep5 ? (
-                <Lock className="w-3.5 h-3.5" />
-              ) : (
-                <ArrowRight className="w-4 h-4" />
-              )}
+              <ArrowRight className="w-3.5 h-3.5" />
             </button>
           ) : (
-            <div className="w-20" />
+            <button
+              type="button"
+              onClick={handleLaunchDashboard}
+              disabled={!isInstagramVerified}
+              className="px-5 py-2 rounded-xl ig-gradient text-white text-xs font-bold shadow-md hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <span>Open Dashboard</span>
+              {!isInstagramVerified ? <Lock className="w-3 h-3" /> : <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />}
+            </button>
           )}
         </div>
       </footer>

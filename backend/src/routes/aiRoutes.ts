@@ -11,7 +11,7 @@ export const aiRouter = Router();
 // GET /api/ai/audio - openly licensed tracks the user can preview and attach
 aiRouter.get('/audio', async (req, res): Promise<void> => {
   try {
-    const query = typeof req.query.q === 'string' ? req.query.q : 'tamil';
+    const query = typeof req.query.q === 'string' ? req.query.q : 'trending english';
     const tracks = await AudioService.search(query);
     res.json({ success: true, tracks });
   } catch (error: any) {

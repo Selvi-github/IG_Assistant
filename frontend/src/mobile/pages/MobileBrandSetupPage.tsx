@@ -86,7 +86,7 @@ export const MobileBrandSetupPage: React.FC<MobileBrandSetupPageProps> = ({ onCo
       return;
     }
     if (!instaHandle.trim()) {
-      addToast('Please enter your Instagram handle', 'warning');
+      addToast('Please enter your Instagram Account or ID', 'warning');
       return;
     }
 
@@ -236,10 +236,10 @@ export const MobileBrandSetupPage: React.FC<MobileBrandSetupPageProps> = ({ onCo
           </div>
         </div>
 
-        {/* Instagram Handle */}
+        {/* Instagram Account or ID */}
         <div className="p-3.5 rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/10">
           <label className="block text-xs font-bold text-zinc-800 dark:text-zinc-200 mb-1">
-            Instagram Handle
+            Instagram Account or ID
           </label>
           <div className="relative">
             <InstagramIcon className="w-4 h-4 text-[#fb2175] absolute left-3 top-1/2 -translate-y-1/2" />

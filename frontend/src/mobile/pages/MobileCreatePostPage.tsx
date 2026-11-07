@@ -52,10 +52,10 @@ interface AudioTrack {
 }
 
 const SAMPLE_SONGS: AudioTrack[] = [
-  { title: 'Golden Hour Waves', artist: 'Nova Horizon', vibe: 'Upbeat' },
-  { title: 'Lofi Sunset Reverie', artist: 'Kaelen Beats', vibe: 'Calm' },
-  { title: 'Midnight City Drive', artist: 'Aura Collective', vibe: 'Night' },
-  { title: 'Morning Espresso Run', artist: 'Daybreak Trio', vibe: 'Energy' },
+  { title: 'Golden Hour Waves', artist: 'Nova Horizon', vibe: 'Pop' },
+  { title: 'Lofi Sunset Reverie', artist: 'Kaelen Beats', vibe: 'Lo-Fi' },
+  { title: 'Midnight City Drive', artist: 'Aura Collective', vibe: 'Electronic' },
+  { title: 'Morning Acoustic Bloom', artist: 'Daybreak Trio', vibe: 'Acoustic' },
 ];
 
 interface PhotoMatch {
@@ -132,7 +132,7 @@ export const MobileCreatePostPage: React.FC = () => {
 
   React.useEffect(() => {
     let active = true;
-    fetch('/api/ai/audio?q=tamil')
+    fetch('/api/ai/audio?q=trending%20english')
       .then((res) => res.json())
       .then((data) => {
         if (!active || !data.success || !Array.isArray(data.tracks) || data.tracks.length === 0) return;
@@ -579,25 +579,32 @@ export const MobileCreatePostPage: React.FC = () => {
     }
 
     savePostToDatabase('published');
+    setPublishStep('published');
+    triggerConfetti();
+
     try {
       await navigator.clipboard.writeText(fullCaption);
     } catch {
-      // Instagram still receives the image. The caption stays in the box below.
+      // Instagram still receives the image.
     }
 
-    const file = fileToShare;
-    const payload: ShareData = { title: generatedTitle || 'Instagram post', text: fullCaption };
-    if (file && navigator.canShare?.({ files: [file] })) {
-      payload.files = [file];
+    // Auto-download media so the photo is ready in the user's phone / computer gallery
+    if (fileToShare) {
+      downloadMedia(fileToShare);
     }
-    if (typeof navigator.share === 'function') {
-      try {
-        await navigator.share(payload);
-      } catch (error: any) {
-        if (error?.name === 'AbortError') return;
-      }
+
+    // Redirect to Instagram post creation page
+    const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
+    if (isMobile) {
+      window.location.href = 'instagram://camera';
+      setTimeout(() => {
+        window.open(`https://www.instagram.com/${cleanHandle}/`, '_blank');
+      }, 1400);
+    } else {
+      window.open('https://www.instagram.com/', '_blank');
     }
-    addToast('Caption copied. Paste it in Add a caption.', 'success');
+
+    addToast('Caption copied & image saved! Opening Instagram to publish your post...', 'success');
   };
 
   const sharePackageText = () => {
@@ -845,31 +852,6 @@ export const MobileCreatePostPage: React.FC = () => {
               <span>Use a photo from this computer</span>
               <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
             </label>
-            <button
-              type="button"
-              onClick={handleFindPhotos}
-              disabled={isFindingPhotos}
-              className="w-full py-2.5 rounded-2xl bg-zinc-100 dark:bg-zinc-900 text-zinc-800 dark:text-zinc-100 text-xs font-semibold cursor-pointer disabled:opacity-50"
-            >
-              {isFindingPhotos ? 'Matching photos...' : 'Find licensed photos'}
-            </button>
-            {photoMatches.length > 0 && (
-              <div className="grid grid-cols-2 gap-2">
-                {photoMatches.map((photo) => (
-                  <button
-                    key={photo.id}
-                    type="button"
-                    onClick={() => handleUseMatchedPhoto(photo)}
-                    className="rounded-2xl overflow-hidden border border-zinc-200 dark:border-white/10 text-left cursor-pointer bg-zinc-50 dark:bg-zinc-900"
-                  >
-                    <img src={photo.thumbnailUrl} alt="" className="w-full aspect-[4/5] object-cover" />
-                    <span className="block px-2 py-1.5 text-[10px] text-zinc-500 truncate">
-                      {photo.creator} · {photo.license.toUpperCase()}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
 
           {showDesigner && (

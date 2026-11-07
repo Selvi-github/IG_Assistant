@@ -46,6 +46,18 @@ export const PublisherPage: React.FC = () => {
     setIsPublishing(true);
     await publishPostNow(selectedPost.id);
     setIsPublishing(false);
+
+    // Copy caption to clipboard and redirect to Instagram
+    try {
+      await navigator.clipboard.writeText(selectedPost.caption);
+    } catch {}
+
+    const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
+    if (isMobile) {
+      window.location.href = 'instagram://camera';
+    } else {
+      window.open('https://www.instagram.com/', '_blank');
+    }
   };
 
   const handleScheduleSubmit = () => {
