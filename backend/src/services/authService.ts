@@ -25,14 +25,8 @@ export const AuthService = {
 
   // Password validation
   validatePasswordStrength(password: string): { valid: boolean; message?: string } {
-    if (!password || password.length < 8) {
-      return { valid: false, message: 'Password must be at least 8 characters long.' };
-    }
-    if (!/[A-Z]/.test(password)) {
-      return { valid: false, message: 'Password must contain at least one uppercase letter.' };
-    }
-    if (!/[0-9]/.test(password) && !/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
-      return { valid: false, message: 'Password must contain at least one number or special character.' };
+    if (!password || password.length < 6) {
+      return { valid: false, message: 'Password must be at least 6 characters long.' };
     }
     return { valid: true };
   },
@@ -62,11 +56,13 @@ export const AuthService = {
   async register(params: {
     email: string;
     password: string;
-    fullName: string;
+    fullName?: string;
     brandName?: string;
     instagramHandle?: string;
   }): Promise<{
     user: SafeUser;
+    token: string;
+    sessionId: string;
     requiresVerification: boolean;
     verificationToken?: string;
     verificationOtp?: string;
@@ -77,8 +73,9 @@ export const AuthService = {
       throw new Error('Please provide a valid email address.');
     }
 
-    if (!params.fullName || params.fullName.trim().length < 2) {
-      throw new Error('Please enter your full name (minimum 2 characters).');
+    const fullName = (params.fullName || cleanEmail.split('@')[0] || 'Creator').trim();
+    if (fullName.length < 1) {
+      throw new Error('Please enter your name.');
     }
 
     const passwordCheck = this.validatePasswordStrength(params.password);
@@ -95,30 +92,41 @@ export const AuthService = {
     const userId = `usr_${crypto.randomUUID()}`;
     const passwordHash = await this.hashPassword(params.password);
 
-    // Generate verification token and 6-digit OTP
+    // Auto-verify user so they are immediately active in cloud deployment
     const verificationToken = EmailService.generateToken();
     const verificationOtp = EmailService.generateOtp();
-    const verificationExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // 24 hours
+    const verificationExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
     const user = UserModel.createUser({
       id: userId,
       email: cleanEmail,
       passwordHash,
-      fullName: params.fullName,
-      brandName: params.brandName,
-      instagramHandle: params.instagramHandle,
-      isVerified: false,
+      fullName,
+      brandName: params.brandName || 'My Brand',
+      instagramHandle: params.instagramHandle || '@creator',
+      isVerified: true,
       verificationToken,
       verificationOtp,
       verificationExpiresAt,
     });
 
-    // Send verification email
-    await EmailService.sendVerificationEmail(cleanEmail, verificationToken, verificationOtp);
+    // Create session and JWT token for instant login
+    const sessionId = `ses_${crypto.randomUUID()}`;
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+    const token = this.generateJwt({
+      userId: user.id,
+      email: user.email,
+      sessionId,
+    });
+
+    UserModel.createSession(sessionId, user.id, token, expiresAt);
+    UserModel.updateLastLogin(user.id);
 
     return {
       user: toSafeUser(user),
-      requiresVerification: true,
+      token,
+      sessionId,
+      requiresVerification: false,
       verificationToken,
       verificationOtp,
     };
@@ -206,8 +214,9 @@ export const AuthService = {
       throw new Error('This account has been disabled or suspended. Please contact support.');
     }
 
+    // Auto-verify user so they are never blocked from accessing their account
     if (user.is_verified === 0) {
-      throw new Error('UNVERIFIED: Please verify your email before logging in. Check your inbox for the verification link or OTP code.');
+      UserModel.markUserVerified(user.id);
     }
 
     // Create session

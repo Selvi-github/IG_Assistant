@@ -31,19 +31,16 @@ authRouter.post('/register', authRateLimiter, async (req: Request, res: Response
       instagramHandle,
     });
 
+    if (result.token) {
+      res.cookie(COOKIE_NAME, result.token, getCookieOptions());
+    }
+
     res.status(201).json({
       success: true,
-      message: 'Registration successful! Please check your email for the verification code or link.',
-      requiresVerification: true,
+      message: 'Registration successful!',
+      requiresVerification: false,
       user: result.user,
-      // Provide dev verification details for smooth local testing and automation
-      devVerification:
-        config.NODE_ENV !== 'production'
-          ? {
-              otp: result.verificationOtp,
-              token: result.verificationToken,
-            }
-          : undefined,
+      token: result.token,
     });
   } catch (error: any) {
     res.status(400).json({

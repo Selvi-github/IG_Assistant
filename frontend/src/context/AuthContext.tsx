@@ -226,10 +226,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         };
       }
 
+      if (data.user) {
+        setUser(data.user);
+      }
       setIsLoading(false);
       return {
         success: true,
-        requiresVerification: true,
+        requiresVerification: Boolean(data.requiresVerification),
         message: data.message,
         devVerification: data.devVerification,
       };
