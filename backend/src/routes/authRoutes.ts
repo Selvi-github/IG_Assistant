@@ -214,7 +214,9 @@ authRouter.get('/google/url', (req: Request, res: Response): void => {
 
 // 8. Google OAuth - Callback Redirect from Google
 authRouter.get('/google/callback', async (req: Request, res: Response): Promise<void> => {
-  const frontendBase = config.FRONTEND_URLS[0] || 'http://localhost:5174';
+  const protocol = req.protocol === 'https' || req.get('x-forwarded-proto') === 'https' ? 'https' : 'http';
+  const host = req.get('host');
+  const frontendBase = host ? `${protocol}://${host}` : (config.FRONTEND_URLS[0] || 'http://localhost:5174');
 
   try {
     const { code, error } = req.query;
