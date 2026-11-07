@@ -110,6 +110,17 @@ export interface BrandKit {
   targetAudience: string;
   defaultHashtags: string[];
   defaultCta: string;
+  businessCategory?: string;
+  contentTypes?: string[];
+  targetAudienceDetails?: {
+    ageGroups?: string[];
+    gender?: string;
+    location?: string;
+    customerType?: string;
+    targetRoles?: string[];
+    interests?: string[];
+  };
+  instagramConnected?: boolean;
 }
 
 export interface ReferenceReelAnalysis {

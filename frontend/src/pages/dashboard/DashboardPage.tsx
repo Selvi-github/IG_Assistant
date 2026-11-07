@@ -17,10 +17,11 @@ import {
   MessageCircle,
   Calendar,
   SlidersHorizontal,
+  X,
 } from 'lucide-react';
 import { InstagramIcon, FacebookIcon } from '@/components/icons/SocialIcons';
 import { formatNumber, formatDate } from '@/lib/utils';
-import { BrandOnboardingModal } from '@/components/onboarding/BrandOnboardingModal';
+import { StepOnboardingWizard } from '@/components/onboarding/StepOnboardingWizard';
 
 export const DashboardPage: React.FC = () => {
   const { posts, connectedAccounts, brandKit, setActiveDraft } = useApp();
@@ -415,11 +416,25 @@ export const DashboardPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Brand Onboarding Modal */}
-      <BrandOnboardingModal
-        isOpen={isOnboardingOpen}
-        onClose={() => setIsOnboardingOpen(false)}
-      />
+      {/* Step-by-Step Onboarding / Brand Setup Wizard Modal */}
+      {isOnboardingOpen && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-md flex flex-col">
+          <div className="flex-1 w-full relative">
+            <button
+              onClick={() => setIsOnboardingOpen(false)}
+              className="fixed top-4 right-4 z-50 p-2 rounded-full bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 hover:bg-rose-500 hover:text-white transition-colors cursor-pointer shadow-lg"
+              title="Close Setup Wizard"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <StepOnboardingWizard
+              onComplete={() => {
+                setIsOnboardingOpen(false);
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

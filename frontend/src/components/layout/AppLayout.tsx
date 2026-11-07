@@ -24,6 +24,7 @@ import { MobileHomePage } from '@/mobile/pages/MobileHomePage';
 import { MobileCreatePostPage } from '@/mobile/pages/MobileCreatePostPage';
 import { MobileQueuePage } from '@/mobile/pages/MobileQueuePage';
 import { MobileBrandSetupPage } from '@/mobile/pages/MobileBrandSetupPage';
+import { StepOnboardingWizard } from '@/components/onboarding/StepOnboardingWizard';
 
 export const AppLayout: React.FC = () => {
   const isMobile = useIsMobile(768);
@@ -61,13 +62,33 @@ export const AppLayout: React.FC = () => {
   }
 
   // =========================================================================
+  // MANDATORY STEP-BY-STEP ONBOARDING GATE (Mobile & Desktop)
+  // Expected User Flow:
+  // Business Category → Content Type → Target Audience → Upload Brand Logo →
+  // Connect Instagram → Complete Integrations → Content Creation Dashboard
+  // The Dashboard should NOT open before Instagram is successfully connected!
+  // =========================================================================
+  const isInstagramConnected = connectedAccounts.some(
+    (a) => a.platform === 'instagram' && a.isConnected
+  );
+  const isOnboarded =
+    (hasBrandProfile || localStorage.getItem('ig_assistant_onboarded') === 'true') &&
+    isInstagramConnected;
+
+  if (!isOnboarded) {
+    return (
+      <StepOnboardingWizard
+        onComplete={() => {
+          navigate('/dashboard');
+        }}
+      />
+    );
+  }
+
+  // =========================================================================
   // AUTOMATIC MOBILE LAYOUT (Active on mobile screens < 768px)
   // =========================================================================
   if (isMobile) {
-    // Check if the user has completed the Brand & Profile Setup form
-    const isOnboarded = hasBrandProfile || localStorage.getItem('ig_assistant_onboarded') === 'true';
-
-    // 3. Brand & Profile Setup Form (Active if new user or on brand edit route)
     const isBrandSetupRoute =
       location.pathname === '/brand-kit' ||
       location.pathname === '/accounts' ||
@@ -85,33 +106,7 @@ export const AppLayout: React.FC = () => {
       location.pathname === '/analytics' ||
       location.pathname === '/mobile/queue';
 
-    // If new user has not completed onboarding form yet, show form first before home page
-    if (!isOnboarded) {
-      return (
-        <div className="min-h-screen bg-slate-50 dark:bg-black text-zinc-900 dark:text-zinc-100 flex flex-col justify-between p-4 selection:bg-rose-500 selection:text-white transition-colors">
-          <header className="h-12 flex items-center justify-between border-b border-zinc-200 dark:border-white/10 px-2 mb-3">
-            <span className="text-xs font-bold ig-gradient-text">IG Assistant · Onboarding</span>
-            <button
-              onClick={toggleTheme}
-              className="p-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-white/10"
-              title="Toggle Bright/Dark Mode"
-            >
-              {theme === 'dark' ? <Sun className="w-3.5 h-3.5 text-amber-400" /> : <Moon className="w-3.5 h-3.5 text-zinc-600" />}
-            </button>
-          </header>
-
-          <main className="flex-1 overflow-y-auto">
-            <MobileBrandSetupPage
-              onComplete={() => {
-                navigate('/dashboard');
-              }}
-            />
-          </main>
-
-          <ToastContainer />
-        </div>
-      );
-    }
+    // 4. Mobile Home Page & Bottom Navigation Tabs (After Onboarding)
 
     // 4. Mobile Home Page & Bottom Navigation Tabs (After Onboarding)
     const renderMobileContent = () => {
