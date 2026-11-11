@@ -23,5 +23,6 @@ export const config = {
   HF_TOKEN: getEnv('HF_TOKEN', '').trim(),
   POLLINATIONS_API_KEY: getEnv('POLLINATIONS_API_KEY', '').trim(),
   COLAB_IMAGE_API_URL: getEnv('COLAB_IMAGE_API_URL', '').trim().replace(/\/$/, ''),
+  VIDEO_API_URL: getEnv('VIDEO_API_URL', '').trim().replace(/\/$/, ''),
 };
 

@@ -29,6 +29,7 @@ export const InstagramPhoneMockup: React.FC<InstagramPhoneMockupProps> = ({
 }) => {
   const [isLiked, setIsLiked] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const [showFullCaption, setShowFullCaption] = useState(false);
 
@@ -41,6 +42,7 @@ export const InstagramPhoneMockup: React.FC<InstagramPhoneMockupProps> = ({
   }, [images.join('|')]);
 
   const currentImage = images[activeSlideIndex] || images[0];
+  const isCurrentVideo = /\.(mp4|webm|mov)(\?|$)/i.test(currentImage || '');
   const likesCount = (post.analytics?.likes || 3420) + (isLiked ? 1 : 0);
 
   const displayText = currentScene?.onScreenText || (post.scenes && post.scenes[0]?.onScreenText) || post.title;
@@ -74,11 +76,24 @@ export const InstagramPhoneMockup: React.FC<InstagramPhoneMockupProps> = ({
           <div className="relative w-full h-full flex flex-col justify-between overflow-hidden">
             {/* Visual Media */}
             <div className="absolute inset-0 z-0">
-              <img
-                src={currentImage}
-                alt="Reel visual"
-                className="w-full h-full object-cover brightness-[0.92]"
-              />
+              {isCurrentVideo ? (
+                <video
+                  key={currentImage}
+                  src={currentImage}
+                  poster={post.thumbnailUrl}
+                  autoPlay
+                  loop
+                  muted={isMuted}
+                  playsInline
+                  className="w-full h-full object-cover brightness-[0.95]"
+                />
+              ) : (
+                <img
+                  src={currentImage}
+                  alt="Reel visual"
+                  className="w-full h-full object-cover brightness-[0.92]"
+                />
+              )}
               <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/90 pointer-events-none" />
             </div>
 
@@ -87,10 +102,15 @@ export const InstagramPhoneMockup: React.FC<InstagramPhoneMockupProps> = ({
               <span className="text-sm font-bold tracking-wide flex items-center gap-1.5 drop-shadow-md">
                 <span>Reels</span>
                 <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-white/20 backdrop-blur-md uppercase tracking-wider font-semibold">
-                  AI
+                  {isCurrentVideo ? 'MP4' : 'AI'}
                 </span>
               </span>
-              <button className="p-1 rounded-full bg-black/30 backdrop-blur-md text-white/90">
+              <button
+                type="button"
+                onClick={() => setIsMuted((m) => !m)}
+                title={isMuted ? 'Unmute audio' : 'Mute audio'}
+                className="p-1 rounded-full bg-black/30 backdrop-blur-md text-white/90 cursor-pointer"
+              >
                 <Volume2 className="w-3.5 h-3.5" />
               </button>
             </div>

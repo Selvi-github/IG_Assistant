@@ -26,9 +26,16 @@ import {
   MessageCircle,
   Play,
   Pause,
+  Video,
+  Download,
 } from 'lucide-react';
 import { InstagramIcon } from '@/components/icons/SocialIcons';
 import { PostDesignEditor } from '@/mobile/components/PostDesignEditor';
+import {
+  generateVideoWithPolling,
+  downloadRemoteAsset,
+  type GeneratedVideoScene,
+} from '@/utils/videoGeneratorClient';
 
 interface CarouselSlide {
   slideNumber: number;
@@ -73,7 +80,7 @@ export const MobileCreatePostPage: React.FC = () => {
   const navigate = useNavigate();
 
   const [description, setDescription] = useState('');
-  const [postType, setPostType] = useState<'image' | 'carousel'>('image');
+  const [postType, setPostType] = useState<'image' | 'carousel' | 'video'>('image');
   const [isGenerating, setIsGenerating] = useState(false);
   const [showDesigner, setShowDesigner] = useState(false);
   const [genProgress, setGenProgress] = useState(0);
@@ -85,6 +92,10 @@ export const MobileCreatePostPage: React.FC = () => {
   const [generatedTitle, setGeneratedTitle] = useState('');
   const [generatedCaption, setGeneratedCaption] = useState('');
   const [generatedImage, setGeneratedImage] = useState<string>('');
+  const [generatedVideo, setGeneratedVideo] = useState<string>('');
+  const [videoScenes, setVideoScenes] = useState<GeneratedVideoScene[]>([]);
+  const [videoStage, setVideoStage] = useState<string>('');
+  const [videoMeta, setVideoMeta] = useState<{ durationSeconds?: number; resolution?: string; engineLabel?: string } | null>(null);
   const [slides, setSlides] = useState<CarouselSlide[]>([]);
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
 
@@ -92,6 +103,7 @@ export const MobileCreatePostPage: React.FC = () => {
     postType === 'carousel' && slides.length > 0
       ? slides[activeSlideIndex]?.imageUrl
       : generatedImage;
+  const activeShareMediaUrl = postType === 'video' && generatedVideo ? generatedVideo : currentPreviewImage;
 
   // 3-Option Caption & RAG State
   const [captionOptions, setCaptionOptions] = useState<CaptionOption[]>([]);
@@ -120,7 +132,7 @@ export const MobileCreatePostPage: React.FC = () => {
   const [currentPostId, setCurrentPostId] = useState<string | null>(null);
 
   React.useEffect(() => {
-    if (!isGenerating) return;
+    if (!isGenerating || postType === 'video') return;
     setGenProgress(4);
     const started = Date.now();
     const timer = window.setInterval(() => {
@@ -128,7 +140,7 @@ export const MobileCreatePostPage: React.FC = () => {
       setGenProgress(Math.min(92, Math.round(6 + (1 - Math.exp(-elapsed / 16000)) * 86)));
     }, 300);
     return () => window.clearInterval(timer);
-  }, [isGenerating]);
+  }, [isGenerating, postType]);
 
   React.useEffect(() => {
     let active = true;
@@ -151,22 +163,25 @@ export const MobileCreatePostPage: React.FC = () => {
     .replace(/^[@.]+/, '')
     .replace(/\/+$/, '') || 'instagram';
 
-  // Pre-cache media file as soon as image changes for zero-latency native sharing (YouTube style)
+  // Pre-cache media file as soon as active media URL changes for zero-latency download & sharing
   React.useEffect(() => {
-    if (!currentPreviewImage) {
+    if (!activeShareMediaUrl) {
       setActiveMediaFile(null);
       return;
     }
 
+    const isVideoAsset = postType === 'video' && Boolean(generatedVideo);
     let isSubscribed = true;
     (async () => {
       try {
-        const res = await fetch(currentPreviewImage);
+        const res = await fetch(activeShareMediaUrl);
         const blob = await res.blob();
         if (isSubscribed) {
-          const file = new File([blob], 'instagram_post.jpg', {
-            type: blob.type || 'image/jpeg',
-          });
+          const file = new File(
+            [blob],
+            isVideoAsset ? 'instagram_reel.mp4' : 'instagram_post.jpg',
+            { type: blob.type || (isVideoAsset ? 'video/mp4' : 'image/jpeg') }
+          );
           setActiveMediaFile(file);
         }
       } catch (err) {
@@ -177,9 +192,31 @@ export const MobileCreatePostPage: React.FC = () => {
     return () => {
       isSubscribed = false;
     };
-  }, [currentPreviewImage]);
+  }, [activeShareMediaUrl, postType, generatedVideo]);
 
-  // Generate Real AI Images & Carousels using the proven, high-aesthetic algorithm
+  const applyGeneratedMetadata = (result: any, activeType: 'image' | 'carousel' | 'video') => {
+    setGeneratedTitle(result.title || '');
+
+    if (Array.isArray(result.captionOptions) && result.captionOptions.length > 0) {
+      setCaptionOptions(result.captionOptions);
+      const defaultIdx = activeType === 'carousel' ? 1 : 0;
+      setSelectedCaptionIndex(defaultIdx);
+      const chosen = result.captionOptions[defaultIdx] || result.captionOptions[0];
+      setGeneratedCaption(`${chosen.caption}\n\n${chosen.hashtags.join(' ')}`);
+    } else if (result.caption) {
+      setGeneratedCaption(result.caption);
+    }
+
+    if (result.recommendedSong) {
+      const track = result.recommendedSong as AudioTrack;
+      setSelectedSong(track);
+      if (track.audioUrl) {
+        setAudioTracks((prev) => [track, ...prev.filter((item) => item.audioUrl !== track.audioUrl)].slice(0, 12));
+      }
+    }
+  };
+
+  // Generate AI Image (default), Carousel, or 9:16 Vertical Reel Video
   const handleGenerateAI = async () => {
     if (!description.trim()) {
       addToast('Please enter what you want to post.', 'warning');
@@ -187,14 +224,48 @@ export const MobileCreatePostPage: React.FC = () => {
     }
 
     setIsGenerating(true);
-    addToast(
-      postType === 'carousel'
-        ? 'Crafting 4-slide Instagram carousel visuals...'
-        : 'Synthesizing 1080x1350 photorealistic post visual...',
-      'info'
-    );
 
     try {
+      if (postType === 'video') {
+        setGenProgress(6);
+        setVideoStage('Queuing 9:16 vertical Reel render...');
+        addToast('Creating your 9:16 promotional Reel video...', 'info');
+
+        const result = await generateVideoWithPolling(
+          {
+            prompt: description.trim(),
+            brandName: brandKit.brandName || 'Aura Studio',
+            instagramHandle: brandKit.handle || '@creator',
+          },
+          (progressInfo) => {
+            setGenProgress(progressInfo.progress);
+            setVideoStage(progressInfo.stage);
+          }
+        );
+
+        applyGeneratedMetadata(result, 'video');
+        setGeneratedVideo(result.videoUrl);
+        setGeneratedImage(result.thumbnailUrl || result.scenes?.[0]?.imageUrl || '');
+        setVideoScenes(result.scenes || []);
+        setVideoMeta({
+          durationSeconds: result.durationSeconds,
+          resolution: result.resolution,
+          engineLabel: result.engineLabel,
+        });
+        setSlides([]);
+        setGenProgress(100);
+        setHasGenerated(true);
+        addToast('9:16 Reel video generated successfully!', 'success');
+        return;
+      }
+
+      addToast(
+        postType === 'carousel'
+          ? 'Crafting Instagram carousel visuals...'
+          : 'Synthesizing 1080x1350 photorealistic post visual...',
+        'info'
+      );
+
       const token = localStorage.getItem('ig_token');
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
@@ -223,18 +294,10 @@ export const MobileCreatePostPage: React.FC = () => {
       }
 
       const { result } = data;
-      setGeneratedTitle(result.title);
-
-      if (Array.isArray(result.captionOptions) && result.captionOptions.length > 0) {
-        setCaptionOptions(result.captionOptions);
-
-        const defaultIdx = postType === 'carousel' ? 1 : 0;
-        setSelectedCaptionIndex(defaultIdx);
-        const chosen = result.captionOptions[defaultIdx] || result.captionOptions[0];
-        setGeneratedCaption(`${chosen.caption}\n\n${chosen.hashtags.join(' ')}`);
-      } else {
-        setGeneratedCaption(result.caption);
-      }
+      applyGeneratedMetadata(result, postType);
+      setGeneratedVideo('');
+      setVideoScenes([]);
+      setVideoMeta(null);
 
       if (postType === 'carousel' && Array.isArray(result.slides) && result.slides.length > 0) {
         setSlides(result.slides);
@@ -245,19 +308,11 @@ export const MobileCreatePostPage: React.FC = () => {
         setSlides([]);
       }
 
-      if (result.recommendedSong) {
-        const track = result.recommendedSong as AudioTrack;
-        setSelectedSong(track);
-        if (track.audioUrl) {
-          setAudioTracks((prev) => [track, ...prev.filter((item) => item.audioUrl !== track.audioUrl)].slice(0, 12));
-        }
-      }
       setGenProgress(100);
-
       setHasGenerated(true);
       addToast(
         postType === 'carousel'
-          ? '4-Slide Instagram Carousel generated successfully!'
+          ? 'Instagram Carousel generated successfully!'
           : 'Photorealistic Instagram post crafted successfully!',
         'success'
       );
@@ -476,29 +531,35 @@ export const MobileCreatePostPage: React.FC = () => {
   };
 
 
-  // Schedule Post Action
-  const handleSchedulePost = () => {
+  const buildPostPayload = (status: 'published' | 'scheduled' | 'draft') => {
     const activeImageUrl =
       postType === 'carousel' && slides.length > 0
         ? slides[0].imageUrl
         : generatedImage;
 
     const mediaList =
-      postType === 'carousel' && slides.length > 0
-        ? slides.map((s) => s.imageUrl)
-        : [activeImageUrl];
+      postType === 'video' && generatedVideo
+        ? [generatedVideo]
+        : postType === 'carousel' && slides.length > 0
+          ? slides.map((s) => s.imageUrl)
+          : [activeImageUrl];
 
-    const post = addPost({
-      title: generatedTitle || description.slice(0, 45) || 'Daily Instagram Post',
+    return {
+      title: generatedTitle || description.slice(0, 45) || (postType === 'video' ? 'Instagram Reel' : 'Instagram Post'),
       caption: generatedCaption || description,
       thumbnailUrl: activeImageUrl,
       mediaUrls: mediaList,
-      postType: postType === 'carousel' ? 'carousel' : 'image',
-      creationMode: 'text',
-      platforms: ['instagram'],
+      postType: (postType === 'video' ? 'reel' : postType === 'carousel' ? 'carousel' : 'image') as 'reel' | 'carousel' | 'image',
+      creationMode: (postType === 'video' ? 'video' : 'text') as 'video' | 'text',
+      platforms: ['instagram'] as Array<'instagram'>,
       recommendedSong: selectedSong,
-      status: 'scheduled',
-    });
+      status,
+    };
+  };
+
+  // Schedule Post Action
+  const handleSchedulePost = () => {
+    const post = addPost(buildPostPayload('scheduled'));
 
     const today = new Date().toISOString().split('T')[0];
     const scheduledIso = new Date(`${today}T${scheduleTime}`).toISOString();
@@ -507,48 +568,46 @@ export const MobileCreatePostPage: React.FC = () => {
     navigate('/dashboard');
   };
 
-  // Helper to persist post into SQLite database
+  // Helper to persist post into database
   const savePostToDatabase = (status: 'published' | 'draft' = 'published') => {
-    const activeImageUrl =
-      postType === 'carousel' && slides.length > 0
-        ? slides[0].imageUrl
-        : generatedImage;
-
-    const fullCaption = generatedCaption || description;
-    const mediaList =
-      postType === 'carousel' && slides.length > 0
-        ? slides.map((s) => s.imageUrl)
-        : [activeImageUrl];
-
+    const payload = buildPostPayload(status);
     let postId = currentPostId;
     if (!postId) {
-      const created = addPost({
-        title: generatedTitle || description.slice(0, 45) || 'Instagram Post',
-        caption: fullCaption,
-        thumbnailUrl: activeImageUrl,
-        mediaUrls: mediaList,
-        postType: postType === 'carousel' ? 'carousel' : 'image',
-        creationMode: 'text',
-        platforms: ['instagram'],
-        recommendedSong: selectedSong,
-        status,
-      });
+      const created = addPost(payload);
       postId = created.id;
       setCurrentPostId(postId);
     } else {
       updatePost(postId, {
         status,
-        caption: fullCaption,
-        thumbnailUrl: activeImageUrl,
-        mediaUrls: mediaList,
+        caption: payload.caption,
+        thumbnailUrl: payload.thumbnailUrl,
+        mediaUrls: payload.mediaUrls,
       });
     }
-
   };
 
-  // Primary Action: Open Device Native Sharing Sheet (YouTube style)
+  const ensureMediaFile = async (): Promise<File | null> => {
+    if (activeMediaFile) return activeMediaFile;
+    if (!activeShareMediaUrl) return null;
+    const isVideoAsset = postType === 'video' && Boolean(generatedVideo);
+    try {
+      const res = await fetch(activeShareMediaUrl);
+      const blob = await res.blob();
+      const file = new File(
+        [blob],
+        isVideoAsset ? 'instagram_reel.mp4' : 'instagram_post.jpg',
+        { type: blob.type || (isVideoAsset ? 'video/mp4' : 'image/jpeg') }
+      );
+      setActiveMediaFile(file);
+      return file;
+    } catch {
+      return null;
+    }
+  };
+
+  // Primary Action: Open Device Native Sharing / Instagram Redirect
   const handlePublishOrShare = async () => {
-    if (!currentPreviewImage && !description.trim()) {
+    if (!activeShareMediaUrl && !description.trim()) {
       addToast('Please generate or upload a post visual first.', 'warning');
       return;
     }
@@ -563,20 +622,7 @@ export const MobileCreatePostPage: React.FC = () => {
       : '';
     const fullCaption = `${generatedCaption || description}${songLine}`.trim();
 
-    // 1. Ensure file is ready
-    let fileToShare = activeMediaFile;
-    if (!fileToShare && currentPreviewImage) {
-      try {
-        const res = await fetch(currentPreviewImage);
-        const blob = await res.blob();
-        fileToShare = new File([blob], 'instagram_post.jpg', {
-          type: blob.type || 'image/jpeg',
-        });
-        setActiveMediaFile(fileToShare);
-      } catch (e) {
-        console.warn('Fetch media file error:', e);
-      }
-    }
+    const fileToShare = await ensureMediaFile();
 
     savePostToDatabase('published');
     setPublishStep('published');
@@ -585,10 +631,10 @@ export const MobileCreatePostPage: React.FC = () => {
     try {
       await navigator.clipboard.writeText(fullCaption);
     } catch {
-      // Instagram still receives the image.
+      // Instagram still receives the media.
     }
 
-    // Auto-download media so the photo is ready in the user's phone / computer gallery
+    // Auto-download media so the photo or MP4 Reel is ready in the user's phone / computer gallery
     if (fileToShare) {
       downloadMedia(fileToShare);
     }
@@ -596,7 +642,7 @@ export const MobileCreatePostPage: React.FC = () => {
     // Redirect to Instagram post creation page
     const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
     if (isMobile) {
-      window.location.href = 'instagram://camera';
+      window.location.href = postType === 'video' ? 'instagram://reels_camera' : 'instagram://camera';
       setTimeout(() => {
         window.open(`https://www.instagram.com/${cleanHandle}/`, '_blank');
       }, 1400);
@@ -604,7 +650,12 @@ export const MobileCreatePostPage: React.FC = () => {
       window.open('https://www.instagram.com/', '_blank');
     }
 
-    addToast('Caption copied & image saved! Opening Instagram to publish your post...', 'success');
+    addToast(
+      postType === 'video'
+        ? 'Caption copied & MP4 Reel saved! Opening Instagram to upload...'
+        : 'Caption copied & image saved! Opening Instagram to publish your post...',
+      'success'
+    );
   };
 
   const sharePackageText = () => {
@@ -613,20 +664,6 @@ export const MobileCreatePostPage: React.FC = () => {
       ? `\n\nAudio: ${selectedSong.title} by ${selectedSong.artist}`
       : '';
     return `${caption}${audioLine}`.trim();
-  };
-
-  const ensureMediaFile = async (): Promise<File | null> => {
-    if (activeMediaFile) return activeMediaFile;
-    if (!currentPreviewImage) return null;
-    try {
-      const res = await fetch(currentPreviewImage);
-      const blob = await res.blob();
-      const file = new File([blob], 'instagram_post.jpg', { type: blob.type || 'image/jpeg' });
-      setActiveMediaFile(file);
-      return file;
-    } catch {
-      return null;
-    }
   };
 
   const downloadMedia = (file: File) => {
@@ -716,14 +753,28 @@ export const MobileCreatePostPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="w-full aspect-[4/5] rounded-2xl overflow-hidden border border-zinc-200 dark:border-white/10 shadow-sm max-w-[260px] mx-auto bg-zinc-100 dark:bg-zinc-900">
-            {currentPreviewImage && (
+          <div
+            className={`w-full ${
+              postType === 'video' && generatedVideo ? 'aspect-[9/16] max-w-[220px]' : 'aspect-[4/5] max-w-[260px]'
+            } rounded-2xl overflow-hidden border border-zinc-200 dark:border-white/10 shadow-sm mx-auto bg-zinc-100 dark:bg-zinc-900`}
+          >
+            {postType === 'video' && generatedVideo ? (
+              <video
+                src={generatedVideo}
+                poster={generatedImage || undefined}
+                controls
+                autoPlay
+                loop
+                playsInline
+                className="w-full h-full object-cover"
+              />
+            ) : currentPreviewImage ? (
               <img
                 src={currentPreviewImage}
                 alt="Published post"
                 className="w-full h-full object-cover"
               />
-            )}
+            ) : null}
           </div>
 
           <div className="p-3.5 rounded-2xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-white/5 text-left space-y-2">
@@ -771,6 +822,9 @@ export const MobileCreatePostPage: React.FC = () => {
                 setGeneratedCaption('');
                 setSlides([]);
                 setGeneratedImage('');
+                setGeneratedVideo('');
+                setVideoScenes([]);
+                setVideoMeta(null);
                 setCurrentPostId(null);
                 navigate('/dashboard');
               }}
@@ -785,8 +839,8 @@ export const MobileCreatePostPage: React.FC = () => {
         <div className="space-y-4">
           {/* 1. Input & Format Card */}
           <div className="p-4 rounded-3xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 space-y-3 shadow-xs">
-            {/* Header with Clean Format Toggle */}
-            <div className="flex items-center justify-between gap-2">
+            {/* Header with Clean Format Toggle (Image default, Carousel, Video) */}
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="text-xs font-bold text-zinc-900 dark:text-white">
                 Create Post
               </span>
@@ -794,24 +848,38 @@ export const MobileCreatePostPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setPostType('image')}
-                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1 ${
                     postType === 'image'
                       ? 'bg-white dark:bg-zinc-800 text-violet-600 dark:text-violet-400 font-bold shadow-xs'
                       : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white'
                   }`}
                 >
-                  Single Image
+                  <ImageIcon className="w-3 h-3" />
+                  <span>Image</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setPostType('carousel')}
-                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1 ${
                     postType === 'carousel'
                       ? 'bg-white dark:bg-zinc-800 text-violet-600 dark:text-violet-400 font-bold shadow-xs'
                       : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white'
                   }`}
                 >
-                  Carousel
+                  <Layers className="w-3 h-3" />
+                  <span>Carousel</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPostType('video')}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1 ${
+                    postType === 'video'
+                      ? 'bg-white dark:bg-zinc-800 text-violet-600 dark:text-violet-400 font-bold shadow-xs'
+                      : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white'
+                  }`}
+                >
+                  <Video className="w-3 h-3" />
+                  <span>Video</span>
                 </button>
               </div>
             </div>
@@ -821,7 +889,11 @@ export const MobileCreatePostPage: React.FC = () => {
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe what you want to post (e.g. Girl and boy in separate cards, same pose, cafe-themed background...)"
+              placeholder={
+                postType === 'video'
+                  ? 'Describe the 9:16 vertical Reel video you want to create (e.g. Warm cafe promo with chocolate coffee and golden lighting)...'
+                  : 'Describe what you want to post (e.g. Silk saree festive showcase, cafe morning vibe...)'
+              }
               className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-2xl p-3.5 text-xs text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:outline-none focus:border-violet-600 leading-relaxed transition-colors font-sans"
             />
 
@@ -834,27 +906,44 @@ export const MobileCreatePostPage: React.FC = () => {
               {isGenerating ? (
                 <>
                   <RefreshCw className="w-4 h-4 animate-spin" />
-                  <span>Creating post {genProgress}%</span>
+                  <span>
+                    {postType === 'video' ? `Creating video ${genProgress}%` : `Creating post ${genProgress}%`}
+                  </span>
                 </>
               ) : (
-                <span>{hasGenerated ? 'Regenerate Post' : 'Generate Post'}</span>
+                <>
+                  {postType === 'video' ? <Video className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
+                  <span>
+                    {postType === 'video'
+                      ? generatedVideo
+                        ? 'Regenerate Video Reel'
+                        : 'Generate Video Reel'
+                      : hasGenerated
+                        ? 'Regenerate Post'
+                        : 'Generate Post'}
+                  </span>
+                </>
               )}
             </button>
-            <button
-              type="button"
-              onClick={() => setShowDesigner((open) => !open)}
-              className="w-full py-2.5 rounded-2xl bg-zinc-100 dark:bg-zinc-900 text-zinc-800 dark:text-zinc-100 text-xs font-semibold cursor-pointer"
-            >
-              {showDesigner ? 'Hide design tools' : 'Design it yourself'}
-            </button>
-            <label className="w-full py-2.5 rounded-2xl bg-zinc-100 dark:bg-zinc-900 text-zinc-800 dark:text-zinc-100 text-xs font-semibold cursor-pointer flex items-center justify-center gap-1.5">
-              <Upload className="w-3.5 h-3.5" />
-              <span>Use a photo from this computer</span>
-              <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-            </label>
+            {postType !== 'video' && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setShowDesigner((open) => !open)}
+                  className="w-full py-2.5 rounded-2xl bg-zinc-100 dark:bg-zinc-900 text-zinc-800 dark:text-zinc-100 text-xs font-semibold cursor-pointer"
+                >
+                  {showDesigner ? 'Hide design tools' : 'Design it yourself'}
+                </button>
+                <label className="w-full py-2.5 rounded-2xl bg-zinc-100 dark:bg-zinc-900 text-zinc-800 dark:text-zinc-100 text-xs font-semibold cursor-pointer flex items-center justify-center gap-1.5">
+                  <Upload className="w-3.5 h-3.5" />
+                  <span>Use a photo from this computer</span>
+                  <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                </label>
+              </>
+            )}
           </div>
 
-          {showDesigner && (
+          {showDesigner && postType !== 'video' && (
             <PostDesignEditor
               backgroundImage={currentPreviewImage || undefined}
               onApply={(dataUrl) => {
@@ -868,26 +957,49 @@ export const MobileCreatePostPage: React.FC = () => {
           )}
 
           {/* 2. Visual Preview */}
-          {(currentPreviewImage || isGenerating) && (
+          {(activeShareMediaUrl || isGenerating) && (
             <div className="p-4 rounded-3xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 space-y-3">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-2">
                 <span className="text-xs font-bold text-zinc-900 dark:text-white">
-                  {postType === 'carousel' ? 'Carousel Visuals' : 'Generated Image'}
+                  {postType === 'video'
+                    ? 'Generated Reel Video (9:16)'
+                    : postType === 'carousel'
+                      ? 'Carousel Visuals'
+                      : 'Generated Image'}
                 </span>
 
-                <label className="text-xs font-semibold text-violet-600 dark:text-violet-400 hover:text-violet-500 flex items-center gap-1 cursor-pointer">
-                  <Upload className="w-3.5 h-3.5" />
-                  <span>Upload Photo</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                  />
-                </label>
+                {postType === 'video' && generatedVideo ? (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      downloadRemoteAsset(generatedVideo, `instagram_reel_${Date.now()}.mp4`).catch(() =>
+                        addToast('Could not download video right now.', 'error')
+                      )
+                    }
+                    className="text-xs font-semibold text-violet-600 dark:text-violet-400 hover:text-violet-500 flex items-center gap-1 cursor-pointer"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Download MP4</span>
+                  </button>
+                ) : (
+                  <label className="text-xs font-semibold text-violet-600 dark:text-violet-400 hover:text-violet-500 flex items-center gap-1 cursor-pointer">
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>Upload Photo</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
+                  </label>
+                )}
               </div>
 
-              <div className="relative w-full aspect-[4/5] rounded-2xl overflow-hidden bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 shadow-sm flex items-center justify-center">
+              <div
+                className={`relative w-full ${
+                  postType === 'video' ? 'aspect-[9/16] max-h-[460px] mx-auto max-w-[270px]' : 'aspect-[4/5]'
+                } rounded-2xl overflow-hidden bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 shadow-sm flex items-center justify-center`}
+              >
                 {isGenerating ? (
                   <div className="text-center p-6 space-y-3 w-full">
                     <p className="text-3xl font-black text-violet-600 dark:text-violet-400 tabular-nums">{genProgress}%</p>
@@ -895,12 +1007,37 @@ export const MobileCreatePostPage: React.FC = () => {
                       <div className="h-full bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 transition-all duration-300" style={{ width: `${genProgress}%` }} />
                     </div>
                     <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                      {genProgress < 35 ? 'Writing a caption for your description' : genProgress < 75 ? 'Creating the image' : 'Finishing the post'}
+                      {postType === 'video'
+                        ? videoStage || 'Rendering 9:16 Reel video...'
+                        : genProgress < 35
+                          ? 'Writing a caption for your description'
+                          : genProgress < 75
+                            ? 'Creating the image'
+                            : 'Finishing the post'}
                     </p>
                     <p className="text-[10px] text-zinc-400">
-                      1080x1350 · Photorealistic
+                      {postType === 'video'
+                        ? '720x1280 · 9:16 Vertical Motion Reel MP4'
+                        : '1080x1350 · Photorealistic'}
                     </p>
                   </div>
+                ) : postType === 'video' && generatedVideo ? (
+                  <>
+                    <video
+                      key={generatedVideo}
+                      src={generatedVideo}
+                      poster={generatedImage || undefined}
+                      controls
+                      autoPlay
+                      loop
+                      playsInline
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute top-3 left-3 bg-black/65 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] text-white font-medium flex items-center gap-1.5 pointer-events-none">
+                      <Video className="w-3 h-3 text-violet-300" />
+                      <span>{videoMeta?.durationSeconds ? `${videoMeta.durationSeconds}s · 9:16 MP4` : '9:16 MP4'}</span>
+                    </div>
+                  </>
                 ) : (
                   <>
                     <img
@@ -950,6 +1087,33 @@ export const MobileCreatePostPage: React.FC = () => {
                   </>
                 )}
               </div>
+
+              {/* Video Scenes Storyboard */}
+              {postType === 'video' && videoScenes.length > 0 && !isGenerating && (
+                <div className="space-y-1.5 pt-1">
+                  <div className="flex items-center justify-between text-[10px] text-zinc-500">
+                    <span>{videoMeta?.engineLabel || '9:16 Promotional Motion Reel'}</span>
+                    <span>{videoScenes.length} animated scenes</span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {videoScenes.map((scene) => (
+                      <div
+                        key={scene.sceneNumber}
+                        className="relative aspect-[4/5] rounded-xl overflow-hidden border border-zinc-200 dark:border-white/10"
+                      >
+                        <img
+                          src={scene.imageUrl}
+                          alt={scene.title}
+                          className="w-full h-full object-cover"
+                        />
+                        <span className="absolute bottom-1 left-1 right-1 bg-black/70 text-white text-[9px] font-semibold px-1.5 py-0.5 rounded truncate">
+                          {scene.sceneNumber}. {scene.title}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Carousel Thumbnails */}
               {postType === 'carousel' && slides.length > 1 && !isGenerating && (
@@ -1125,19 +1289,23 @@ export const MobileCreatePostPage: React.FC = () => {
 
             <button
               onClick={handlePublishOrShare}
-              disabled={isGenerating || (!currentPreviewImage && !description.trim())}
+              disabled={isGenerating || (!activeShareMediaUrl && !description.trim())}
               className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-xs font-bold shadow-lg hover:brightness-110 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
             >
               <InstagramIcon className="w-4 h-4" />
               <span>
                 {scheduleMode === 'now'
-                  ? 'Publish to Instagram'
+                  ? postType === 'video'
+                    ? 'Publish Reel to Instagram'
+                    : 'Publish to Instagram'
                   : `Schedule for ${scheduleTime}`}
               </span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
             <p className="text-[10px] text-zinc-500 text-center px-2">
-              Instagram receives the image only. The caption is copied — click Add a caption and paste.
+              {postType === 'video'
+                ? 'Your MP4 Reel saves automatically and the caption is copied — paste it on Instagram.'
+                : 'Instagram receives the image only. The caption is copied — click Add a caption and paste.'}
             </p>
           </div>
         </div>

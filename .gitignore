@@ -13,10 +13,13 @@ backend/.env
 frontend/.env
 *.local
 
-# SQLite Database and generated image files
+# SQLite Database and generated media files
 backend/data/*.db*
 backend/data/generated_images/*
 !backend/data/generated_images/.gitkeep
+backend/data/generated_videos/*
+!backend/data/generated_videos/.gitkeep
+data/
 
 # Logs and system files
 *.log

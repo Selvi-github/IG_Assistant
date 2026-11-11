@@ -16,7 +16,10 @@ import {
   Sliders,
   Scissors,
   Send,
+  Layers,
+  Download,
 } from 'lucide-react';
+import { generateVideoWithPolling, downloadRemoteAsset } from '@/utils/videoGeneratorClient';
 
 export const StudioPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -42,7 +45,9 @@ export const StudioPage: React.FC = () => {
   const [topic, setTopic] = useState('5 Secret AI Habits to Scale Instagram Reach');
   const [tone, setTone] = useState('Inspirational & Professional');
   const [targetAudience, setTargetAudience] = useState('Founders, Creators, & Digital Agencies');
-  const [postTypeChoice, setPostTypeChoice] = useState<'reel' | 'carousel'>('reel');
+  const [postTypeChoice, setPostTypeChoice] = useState<'image' | 'carousel' | 'video'>('image');
+  const [generatedVideoUrl, setGeneratedVideoUrl] = useState<string>('');
+  const [videoStage, setVideoStage] = useState<string>('');
   const [photoMatches, setPhotoMatches] = useState<Array<{ id: string; thumbnailUrl: string; creator: string; license: string }>>([]);
   const [isFindingPhotos, setIsFindingPhotos] = useState(false);
 
@@ -138,7 +143,7 @@ export const StudioPage: React.FC = () => {
   });
 
   useEffect(() => {
-    if (!isGenerating) return;
+    if (!isGenerating || (activeMode === 'text' && postTypeChoice === 'video')) return;
     setGenProgress(4);
     const started = Date.now();
     const timer = window.setInterval(() => {
@@ -146,20 +151,64 @@ export const StudioPage: React.FC = () => {
       setGenProgress(Math.min(92, Math.round(6 + (1 - Math.exp(-elapsed / 16000)) * 86)));
     }, 300);
     return () => window.clearInterval(timer);
-  }, [isGenerating]);
+  }, [isGenerating, activeMode, postTypeChoice]);
 
   const handleGenerate = async () => {
     setIsGenerating(true);
-    addToast(`Creating ${activeMode} content from your description...`, 'info');
 
     let newTitle = topic;
     let newScenes: ScriptScene[] = [];
     let newCaption = '';
-    let newPostType = postTypeChoice;
+    let newPostType: 'image' | 'carousel' | 'reel' =
+      postTypeChoice === 'video' ? 'reel' : postTypeChoice;
     let newThumb = '';
     let newMedia: string[] = [];
 
-    if (activeMode === 'text') {
+    if (activeMode === 'text' && postTypeChoice === 'video') {
+      try {
+        setGenProgress(6);
+        setVideoStage('Queuing 9:16 vertical Reel render...');
+        addToast('Rendering your 9:16 vertical Reel video...', 'info');
+
+        const r = await generateVideoWithPolling(
+          {
+            prompt: topic.trim(),
+            brandName: brandKit.brandName || 'Aura Studio',
+            instagramHandle: brandKit.handle || '@aurastudio.ai',
+          },
+          (info) => {
+            setGenProgress(info.progress);
+            setVideoStage(info.stage);
+          }
+        );
+
+        newTitle = r.title || topic;
+        newCaption = r.caption;
+        newPostType = 'reel';
+        newThumb = r.thumbnailUrl || r.scenes?.[0]?.imageUrl || '';
+        newMedia = [r.videoUrl];
+        setGeneratedVideoUrl(r.videoUrl);
+        newScenes = (r.scenes || []).map((s, idx) => ({
+          id: `sc-vid-${idx + 1}`,
+          sceneNumber: s.sceneNumber,
+          duration: s.duration,
+          title: s.title,
+          visualPrompt: `Motion Reel Scene ${s.sceneNumber}`,
+          spokenAudio: s.subtitle,
+          onScreenText: s.onScreenText,
+          textPosition: (idx % 3 === 0 ? 'center' : idx % 3 === 1 ? 'top' : 'bottom') as any,
+          transition: s.transition === 'pan' ? 'slide' : s.transition,
+          imageUrl: s.imageUrl,
+          videoUrl: r.videoUrl,
+        }));
+      } catch (err: any) {
+        setIsGenerating(false);
+        addToast(err.message || 'Could not create that video.', 'error');
+        return;
+      }
+    } else if (activeMode === 'text') {
+      addToast(`Creating ${postTypeChoice} from your description...`, 'info');
+      setGeneratedVideoUrl('');
       try {
         const token = localStorage.getItem('ig_token');
         const headers: Record<string, string> = {
@@ -468,32 +517,44 @@ export const StudioPage: React.FC = () => {
 
                 <div>
                   <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
-                    Format
+                    Output Format
                   </label>
-                  <div className="flex gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     <button
                       type="button"
-                      onClick={() => setPostTypeChoice('reel')}
-                      className={`flex-1 py-2 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
-                        postTypeChoice === 'reel'
-                          ? 'border-rose-500 bg-rose-500/10 text-rose-600 dark:text-rose-400'
-                          : 'border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400'
-                      }`}
-                    >
-                      <Video className="w-3.5 h-3.5" />
-                      <span>9:16 Vertical Reel</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPostTypeChoice('carousel')}
-                      className={`flex-1 py-2 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
-                        postTypeChoice === 'carousel'
-                          ? 'border-rose-500 bg-rose-500/10 text-rose-600 dark:text-rose-400'
+                      onClick={() => setPostTypeChoice('image')}
+                      className={`py-2 px-2.5 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                        postTypeChoice === 'image'
+                          ? 'border-violet-600 bg-violet-500/10 text-violet-600 dark:text-violet-400 font-bold'
                           : 'border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400'
                       }`}
                     >
                       <ImageIcon className="w-3.5 h-3.5" />
-                      <span>Carousel (1:1)</span>
+                      <span>Image</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPostTypeChoice('carousel')}
+                      className={`py-2 px-2.5 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                        postTypeChoice === 'carousel'
+                          ? 'border-violet-600 bg-violet-500/10 text-violet-600 dark:text-violet-400 font-bold'
+                          : 'border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400'
+                      }`}
+                    >
+                      <Layers className="w-3.5 h-3.5" />
+                      <span>Carousel</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPostTypeChoice('video')}
+                      className={`py-2 px-2.5 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                        postTypeChoice === 'video'
+                          ? 'border-violet-600 bg-violet-500/10 text-violet-600 dark:text-violet-400 font-bold'
+                          : 'border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400'
+                      }`}
+                    >
+                      <Video className="w-3.5 h-3.5" />
+                      <span>Video Reel</span>
                     </button>
                   </div>
                 </div>
@@ -630,17 +691,29 @@ export const StudioPage: React.FC = () => {
             <button
               onClick={handleGenerate}
               disabled={isGenerating}
-              className="w-full py-3 px-4 rounded-xl ig-gradient text-white font-bold text-xs shadow-md hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-xs shadow-md hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
             >
               {isGenerating ? (
                 <>
                   <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                  <span>Creating content {genProgress}%</span>
+                  <span>
+                    {activeMode === 'text' && postTypeChoice === 'video'
+                      ? `${videoStage || 'Rendering video'} (${genProgress}%)`
+                      : `Creating content ${genProgress}%`}
+                  </span>
                 </>
               ) : (
                 <>
-                  <Cpu className="w-3.5 h-3.5" />
-                  <span>Generate Content Script</span>
+                  {activeMode === 'text' && postTypeChoice === 'video' ? (
+                    <Video className="w-3.5 h-3.5" />
+                  ) : (
+                    <Cpu className="w-3.5 h-3.5" />
+                  )}
+                  <span>
+                    {activeMode === 'text' && postTypeChoice === 'video'
+                      ? 'Generate 9:16 Video Reel'
+                      : 'Generate Content'}
+                  </span>
                 </>
               )}
             </button>
@@ -725,7 +798,7 @@ export const StudioPage: React.FC = () => {
             <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">
               Live Phone Mockup
             </span>
-            <span className="text-[10px] text-rose-500 font-semibold">9:16 Vertical</span>
+            <span className="text-[10px] text-violet-600 dark:text-violet-400 font-semibold">9:16 Vertical</span>
           </div>
 
           <InstagramPhoneMockup
@@ -733,17 +806,32 @@ export const StudioPage: React.FC = () => {
             mode={generatedPost.postType === 'carousel' ? 'post' : 'reel'}
           />
 
+          {generatedVideoUrl && (
+            <button
+              type="button"
+              onClick={() =>
+                downloadRemoteAsset(generatedVideoUrl, `instagram_reel_${Date.now()}.mp4`).catch(() =>
+                  addToast('Could not download video right now.', 'error')
+                )
+              }
+              className="w-full max-w-[340px] py-2.5 px-3 rounded-xl bg-violet-600/10 hover:bg-violet-600/20 text-violet-600 dark:text-violet-400 font-bold text-xs border border-violet-500/30 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Download Generated MP4 Reel</span>
+            </button>
+          )}
+
           <div className="w-full grid grid-cols-2 gap-2 max-w-[340px]">
             <button
               onClick={handleSendToEditor}
               className="py-2.5 px-3 rounded-xl bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-800 dark:text-white font-semibold text-xs border border-zinc-200 dark:border-white/10 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
             >
-              <Scissors className="w-3.5 h-3.5 text-rose-500" />
+              <Scissors className="w-3.5 h-3.5 text-violet-600" />
               <span>Video Editor</span>
             </button>
             <button
               onClick={handleSendToPublisher}
-              className="py-2.5 px-3 rounded-xl ig-gradient text-white font-bold text-xs shadow-sm hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              className="py-2.5 px-3 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-bold text-xs shadow-sm hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <Send className="w-3.5 h-3.5" />
               <span>Publish Queue</span>

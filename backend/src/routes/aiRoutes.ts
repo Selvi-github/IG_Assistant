@@ -2,11 +2,28 @@ import { Router, Response } from 'express';
 import { optionalAuth, AuthenticatedRequest } from '../middleware/authMiddleware.js';
 import { BrandModel } from '../models/brandModel.js';
 import { AiImageService } from '../services/aiImageService.js';
+import { AiVideoService } from '../services/aiVideoService.js';
 import { CaptionRagService } from '../services/captionRagService.js';
 import { AudioService } from '../services/audioService.js';
 import { ImageRetrievalService } from '../services/imageRetrievalService.js';
 
 export const aiRouter = Router();
+
+async function resolveBrandIdentity(req: AuthenticatedRequest): Promise<{ brandName: string; instagramHandle: string }> {
+  let brandName = req.body?.brandName || 'My Brand';
+  let instagramHandle = req.body?.instagramHandle || '@creator';
+
+  if (req.user?.id) {
+    const brand = await BrandModel.getByUserId(req.user.id);
+    if (brand?.company_name) brandName = brand.company_name;
+    else if (req.user.brand_name) brandName = req.user.brand_name;
+
+    if (brand?.instagram_handle) instagramHandle = brand.instagram_handle;
+    else if (req.user.instagram_handle) instagramHandle = req.user.instagram_handle;
+  }
+
+  return { brandName, instagramHandle };
+}
 
 // GET /api/ai/audio - openly licensed tracks the user can preview and attach
 aiRouter.get('/audio', async (req, res): Promise<void> => {
@@ -97,7 +114,73 @@ aiRouter.post('/photos/use', optionalAuth, async (req: AuthenticatedRequest, res
   }
 });
 
-// POST /api/ai/generate - Generate Real AI Post Images & Carousels (Zero GPU required)
+// POST /api/ai/video-jobs - Submit async 9:16 vertical video Reel render job
+aiRouter.post('/video-jobs', optionalAuth, async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const prompt = typeof req.body?.prompt === 'string' ? req.body.prompt.trim() : '';
+    if (!prompt) {
+      res.status(400).json({
+        success: false,
+        error: 'Please provide a description for your video.',
+      });
+      return;
+    }
+
+    const { brandName, instagramHandle } = await resolveBrandIdentity(req);
+    const job = AiVideoService.submitJob({
+      userId: req.user?.id || null,
+      prompt,
+      brandName,
+      instagramHandle,
+    });
+
+    res.status(202).json({
+      success: true,
+      jobId: job.jobId,
+      status: job.status,
+      progress: job.progress,
+      stage: job.stage,
+    });
+  } catch (error: any) {
+    const isQueueFull = /busy/i.test(error?.message || '');
+    res.status(isQueueFull ? 429 : 500).json({
+      success: false,
+      error: error.message || 'Could not queue video job.',
+    });
+  }
+});
+
+// GET /api/ai/video-jobs/:jobId - Poll video render progress & completed result
+aiRouter.get('/video-jobs/:jobId', optionalAuth, (req: AuthenticatedRequest, res: Response): void => {
+  const jobId = String(req.params.jobId || '');
+  const job = AiVideoService.getJob(jobId, req.user?.id || null);
+  if (!job) {
+    res.status(404).json({
+      success: false,
+      error: 'Video job not found or expired.',
+    });
+    return;
+  }
+
+  res.json({
+    success: true,
+    jobId: job.jobId,
+    status: job.status,
+    progress: job.progress,
+    stage: job.stage,
+    result: job.status === 'succeeded' ? job.result : undefined,
+    error: job.status === 'failed' ? job.error : undefined,
+  });
+});
+
+// POST /api/ai/video-jobs/:jobId/cancel - Cancel queued video job
+aiRouter.post('/video-jobs/:jobId/cancel', optionalAuth, (req: AuthenticatedRequest, res: Response): void => {
+  const jobId = String(req.params.jobId || '');
+  const cancelled = AiVideoService.cancelJob(jobId, req.user?.id || null);
+  res.json({ success: true, cancelled });
+});
+
+// POST /api/ai/generate - Generate AI Images (default), Carousels, or Reel Video
 aiRouter.post('/generate', optionalAuth, async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const { prompt, postType = 'image', slidesCount = 4 } = req.body;
@@ -110,16 +193,22 @@ aiRouter.post('/generate', optionalAuth, async (req: AuthenticatedRequest, res: 
       return;
     }
 
-    let brandName = req.body.brandName || 'My Brand';
-    let instagramHandle = req.body.instagramHandle || '@creator';
+    const { brandName, instagramHandle } = await resolveBrandIdentity(req);
 
-    if (req.user?.id) {
-      const brand = await BrandModel.getByUserId(req.user.id);
-      if (brand?.company_name) brandName = brand.company_name;
-      else if (req.user.brand_name) brandName = req.user.brand_name;
+    if (postType === 'video' || postType === 'reel') {
+      const videoResult = await AiVideoService.generateVideoPost({
+        userId: req.user?.id || null,
+        prompt,
+        brandName,
+        instagramHandle,
+      });
 
-      if (brand?.instagram_handle) instagramHandle = brand.instagram_handle;
-      else if (req.user.instagram_handle) instagramHandle = req.user.instagram_handle;
+      res.json({
+        success: true,
+        message: 'Vertical 9:16 Reel video generated successfully.',
+        result: videoResult,
+      });
+      return;
     }
 
     const result = await AiImageService.generatePost({

@@ -101,12 +101,19 @@ app.use('/api/posts', postRouter);
 app.use('/api/ai', aiRouter);
 app.use('/api/instagram', instagramRouter);
 
-// Serve locally generated Hugging Face AI images without external rate limits
+// Serve locally generated AI images without external rate limits
 const imagesDir = path.join(process.cwd(), 'data', 'generated_images');
 if (!fs.existsSync(imagesDir)) {
   fs.mkdirSync(imagesDir, { recursive: true });
 }
 app.use('/api/ai/images', express.static(imagesDir));
+
+// Serve locally rendered 9:16 vertical Reel MP4 videos
+const videosDir = path.join(process.cwd(), 'data', 'generated_videos');
+if (!fs.existsSync(videosDir)) {
+  fs.mkdirSync(videosDir, { recursive: true });
+}
+app.use('/api/ai/videos', express.static(videosDir));
 
 // Root catch-all for unmatched api routes
 app.use('/api', (req, res) => {
