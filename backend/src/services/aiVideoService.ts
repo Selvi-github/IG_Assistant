@@ -8,6 +8,7 @@ import { config } from '../config/env.js';
 import { AiImageService } from './aiImageService.js';
 import { AudioService } from './audioService.js';
 import { CaptionRagService, CaptionOption } from './captionRagService.js';
+import { MediaAssetModel } from '../models/mediaAssetModel.js';
 
 const FFMPEG_BIN: string = (ffmpegStatic as unknown as string) || 'ffmpeg';
 const MAX_CONCURRENT_RENDERS = 1;
@@ -313,6 +314,7 @@ async function renderJobVideo(job: VideoJobRecord): Promise<GeneratedAiVideo> {
       const rawBuf = Buffer.from(buffer);
       fs.writeFileSync(publicImagePath, rawBuf);
       fs.writeFileSync(tempScenePath, rawBuf);
+      void MediaAssetModel.saveAsset(sceneImageName, rawBuf);
 
       const publicSceneUrl = `/api/ai/images/${sceneImageName}`;
       scenePaths.push(tempScenePath);
@@ -395,7 +397,7 @@ async function renderJobVideo(job: VideoJobRecord): Promise<GeneratedAiVideo> {
           '128k',
           '-shortest',
           '-threads',
-          '2',
+          '1',
           '-movflags',
           '+faststart',
           videoFilePath,
@@ -429,7 +431,7 @@ async function renderJobVideo(job: VideoJobRecord): Promise<GeneratedAiVideo> {
         '-crf',
         '24',
         '-threads',
-        '2',
+        '1',
         '-movflags',
         '+faststart',
         videoFilePath,
@@ -440,6 +442,7 @@ async function renderJobVideo(job: VideoJobRecord): Promise<GeneratedAiVideo> {
       throw new Error('Video rendering produced an empty file.');
     }
 
+    await MediaAssetModel.saveAsset(videoFileName, fs.readFileSync(videoFilePath));
     updateJob(job.jobId, { progress: 96, stage: 'Finalizing MP4 reel...' });
 
     return {

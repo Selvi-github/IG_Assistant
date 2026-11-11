@@ -3,6 +3,7 @@ import fs from 'fs';
 import { config } from '../config/env.js';
 import { CaptionRagService, CaptionOption } from './captionRagService.js';
 import { AudioService } from './audioService.js';
+import { MediaAssetModel } from '../models/mediaAssetModel.js';
 
 export interface CarouselSlide {
   slideNumber: number;
@@ -758,7 +759,9 @@ export const AiImageService = {
       if (resp.ok) {
         const buffer = await resp.arrayBuffer();
         if (buffer.byteLength > 2000) {
-          fs.writeFileSync(localFilePath, Buffer.from(buffer));
+          const buf = Buffer.from(buffer);
+          fs.writeFileSync(localFilePath, buf);
+          void MediaAssetModel.saveAsset(fileName, buf);
           console.log(`[AI Cache] Saved ${fileName} locally (${buffer.byteLength} bytes)`);
           return `/api/ai/images/${fileName}`;
         }
@@ -862,7 +865,9 @@ export const AiImageService = {
 
         const imagesDir = path.join(process.cwd(), 'data', 'generated_images');
         if (!fs.existsSync(imagesDir)) fs.mkdirSync(imagesDir, { recursive: true });
-        fs.writeFileSync(path.join(imagesDir, fileName), Buffer.from(buffer));
+        const rawBuf = Buffer.from(buffer);
+        fs.writeFileSync(path.join(imagesDir, fileName), rawBuf);
+        await MediaAssetModel.saveAsset(fileName, rawBuf);
         const servedUrl = `/api/ai/images/${fileName}`;
 
         const slide: CarouselSlide = {

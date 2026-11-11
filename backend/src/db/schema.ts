@@ -84,6 +84,13 @@ CREATE TABLE IF NOT EXISTS connected_accounts (
   FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS media_assets (
+  filename TEXT PRIMARY KEY,
+  mime_type TEXT NOT NULL,
+  data_base64 TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id);
 CREATE INDEX IF NOT EXISTS idx_users_verification_token ON users(verification_token);

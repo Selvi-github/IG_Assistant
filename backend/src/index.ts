@@ -11,6 +11,7 @@ import { postRouter } from './routes/postRoutes.js';
 import { aiRouter } from './routes/aiRoutes.js';
 import { instagramRouter } from './routes/instagramRoutes.js';
 import { GoogleAuthService } from './services/googleAuthService.js';
+import { MediaAssetModel } from './models/mediaAssetModel.js';
 
 const app = express();
 
@@ -108,12 +109,64 @@ if (!fs.existsSync(imagesDir)) {
 }
 app.use('/api/ai/images', express.static(imagesDir));
 
+const LEGACY_IMAGE_FALLBACKS = [
+  'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1080&h=1350&q=85',
+  'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1080&h=1350&q=85',
+  'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1080&h=1350&q=85',
+  'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1080&h=1350&q=85',
+];
+
+// Restore images from DB on ephemeral restarts, or redirect legacy pre-migration URLs without 404
+app.get('/api/ai/images/:filename', async (req, res) => {
+  const safeName = String(req.params.filename || '').replace(/[^a-zA-Z0-9._-]/g, '');
+  if (!safeName) {
+    res.redirect(302, LEGACY_IMAGE_FALLBACKS[0]);
+    return;
+  }
+  const diskPath = path.join(imagesDir, safeName);
+  const asset = await MediaAssetModel.getAsset(safeName);
+  if (asset) {
+    try {
+      fs.writeFileSync(diskPath, asset.buffer);
+    } catch {
+      // Ignore disk write failure on read-only paths
+    }
+    res.setHeader('Content-Type', asset.mimeType);
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    res.send(asset.buffer);
+    return;
+  }
+
+  let hash = 0;
+  for (let i = 0; i < safeName.length; i++) hash = (hash * 31 + safeName.charCodeAt(i)) >>> 0;
+  res.redirect(302, LEGACY_IMAGE_FALLBACKS[hash % LEGACY_IMAGE_FALLBACKS.length]);
+});
+
 // Serve locally rendered 9:16 vertical Reel MP4 videos
 const videosDir = path.join(process.cwd(), 'data', 'generated_videos');
 if (!fs.existsSync(videosDir)) {
   fs.mkdirSync(videosDir, { recursive: true });
 }
 app.use('/api/ai/videos', express.static(videosDir));
+
+// Restore videos from DB after ephemeral container restart
+app.get('/api/ai/videos/:filename', async (req, res) => {
+  const safeName = String(req.params.filename || '').replace(/[^a-zA-Z0-9._-]/g, '');
+  const asset = safeName ? await MediaAssetModel.getAsset(safeName) : null;
+  if (!asset) {
+    res.status(404).json({ success: false, error: 'Video file not found.' });
+    return;
+  }
+  const diskPath = path.join(videosDir, safeName);
+  try {
+    fs.writeFileSync(diskPath, asset.buffer);
+    res.sendFile(diskPath);
+    return;
+  } catch {
+    res.setHeader('Content-Type', asset.mimeType);
+    res.send(asset.buffer);
+  }
+});
 
 // Root catch-all for unmatched api routes
 app.use('/api', (req, res) => {

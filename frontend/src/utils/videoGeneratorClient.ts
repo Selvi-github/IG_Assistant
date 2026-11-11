@@ -50,6 +50,34 @@ function getAuthHeaders(): Record<string, string> {
 }
 
 /**
+ * Retries transient socket/502/503 drops (e.g., Render server wake-up or rollover).
+ */
+export async function fetchWithRetry(url: string, init: RequestInit, maxRetries = 2): Promise<Response> {
+  let lastErr: any;
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const res = await fetch(url, init);
+      if ((res.status === 502 || res.status === 503 || res.status === 504) && attempt < maxRetries) {
+        await new Promise((r) => setTimeout(r, 1800 * (attempt + 1)));
+        continue;
+      }
+      return res;
+    } catch (err: any) {
+      lastErr = err;
+      if (attempt < maxRetries) {
+        await new Promise((r) => setTimeout(r, 1800 * (attempt + 1)));
+        continue;
+      }
+    }
+  }
+  throw new Error(
+    lastErr?.message === 'Failed to fetch'
+      ? 'Server is waking up or restarting — please wait a second and try again.'
+      : lastErr?.message || 'Network connection lost. Please try again.'
+  );
+}
+
+/**
  * Submits an async 9:16 vertical Reel video render job and polls until complete.
  */
 export async function generateVideoWithPolling(
@@ -61,7 +89,7 @@ export async function generateVideoWithPolling(
   onProgress?: (info: VideoGenerationProgress) => void
 ): Promise<GeneratedVideoResult> {
   const headers = getAuthHeaders();
-  const submitRes = await fetch('/api/ai/video-jobs', {
+  const submitRes = await fetchWithRetry('/api/ai/video-jobs', {
     method: 'POST',
     headers,
     credentials: 'include',
@@ -84,9 +112,9 @@ export async function generateVideoWithPolling(
   const maxWaitMs = 180_000;
 
   while (Date.now() - startedAt < maxWaitMs) {
-    await new Promise((resolve) => setTimeout(resolve, 900));
+    await new Promise((resolve) => setTimeout(resolve, 1100));
 
-    const statusRes = await fetch(`/api/ai/video-jobs/${encodeURIComponent(jobId)}`, {
+    const statusRes = await fetchWithRetry(`/api/ai/video-jobs/${encodeURIComponent(jobId)}`, {
       headers,
       credentials: 'include',
     });

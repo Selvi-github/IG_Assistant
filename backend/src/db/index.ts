@@ -92,9 +92,18 @@ export async function execute(sql: string, params: any[] | Record<string, any> =
   }
 }
 
-// Auto-seed default demo account if empty
+// Auto-ensure schema extensions & default demo account
 export async function ensureSeeded(): Promise<void> {
   try {
+    await execute(`
+      CREATE TABLE IF NOT EXISTS media_assets (
+        filename TEXT PRIMARY KEY,
+        mime_type TEXT NOT NULL,
+        data_base64 TEXT NOT NULL,
+        created_at TEXT NOT NULL
+      )
+    `);
+
     const existing = await queryOne('SELECT id FROM users LIMIT 1');
     if (!existing) {
       const defaultHash = '$2b$10$Fr/Yd8iTqU.mp/GuRsxubO8RUtzRxKMt/m.8EiYNbz4W2QP4toflq'; // Password123

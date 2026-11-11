@@ -34,6 +34,7 @@ import { PostDesignEditor } from '@/mobile/components/PostDesignEditor';
 import {
   generateVideoWithPolling,
   downloadRemoteAsset,
+  fetchWithRetry,
   type GeneratedVideoScene,
 } from '@/utils/videoGeneratorClient';
 
@@ -274,7 +275,7 @@ export const MobileCreatePostPage: React.FC = () => {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const res = await fetch('/api/ai/generate', {
+      const res = await fetchWithRetry('/api/ai/generate', {
         method: 'POST',
         headers,
         credentials: 'include',
